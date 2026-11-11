@@ -10,6 +10,7 @@
 ## AddonCompartmentFunc: InriWritMaster_OnCompartmentClick
 ## Category: Professions
 ## X-License: MIT
+## X-Curse-Project-ID: 1799394
 
 Data.lua
 InriWritMaster.lua
