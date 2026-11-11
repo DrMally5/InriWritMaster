@@ -1,5 +1,9 @@
 # Inri's WritMaster
 
+## v1.0.1 (2026-11-12)
+
+- New "AH auto: on/off" button in the title bar to choose whether WritMaster opens by itself at the Auction House.
+
 ## v1.0.0 (2026-11-12)
 
 First public release for WoW: Forever 1.60.1.

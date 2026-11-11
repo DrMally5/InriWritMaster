@@ -827,8 +827,20 @@ local function BuildFrame()
   close:SetPoint("TOPRIGHT", 2, 2)
   close:SetScale(0.85)
 
+  -- always-visible toggle: open automatically at the Auction House
+  UI.btnAutoAH = Button(f, "", 78, 18, function()
+    local st = WM.db.settings
+    st.autoAH = not st.autoAH
+    WM.UpdateAutoAH()
+    if UI.tab == 4 then WM:ShowTab(4) end
+  end)
+  UI.btnAutoAH:SetPoint("TOPRIGHT", -32, -8)
+  UI.btnAutoAH:HookScript("OnEnter", function(s) GameTooltip:SetOwner(s, "ANCHOR_BOTTOM"); GameTooltip:SetText("Auto-open at the Auction House", 1, 0.82, 0)
+    GameTooltip:AddLine("When on, WritMaster opens on the Writs tab whenever you open the Auction House and closes with it. Click to switch.", 1, 1, 1, true); GameTooltip:Show() end)
+  UI.btnAutoAH:HookScript("OnLeave", function() GameTooltip:Hide() end)
+
   UI.favor = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  UI.favor:SetPoint("TOPRIGHT", -34, -13)
+  UI.favor:SetPoint("TOPRIGHT", -118, -13)
 
   Line(f, -32)
 
@@ -915,6 +927,14 @@ end
 ---------------------------------------------------------------------------
 -- Header status
 ---------------------------------------------------------------------------
+function WM.UpdateAutoAH()
+  local b = UI.btnAutoAH
+  if not b then return end
+  local on = WM.db and WM.db.settings.autoAH
+  b.text:SetText(on and col("gold", "AH auto: on") or col("grey", "AH auto: off"))
+  b:SetActive(on and true or false)
+end
+
 local function UpdateHeader()
   local name, reaction, cur, lo, hi = GetRep()
   local camp = WM.CAMP[PlayerFaction()]
@@ -928,6 +948,7 @@ local function UpdateHeader()
   local fav, icon = GetFavor()
   local ah = HasAuctionator() and "" or col("red", "Auctionator not loaded   ")
   local reset = WM.ResetText and WM.ResetText() or ""
+  WM.UpdateAutoAH()
   UI.favor:SetText(ah .. reset .. (fav and fmt("%s %s", col("white", fav), icon and ("|T" .. icon .. ":12|t") or col("gold", "Favor")) or ""))
 end
 
@@ -1315,7 +1336,7 @@ local INFO_COLS = { { title = "Reputation & Merchant's Favor", w = 820 } }
 local function ShowInfo()
   ClearFilters()
   local st = WM.db.settings
-  AddFilter("Auto-open at AH", 104, function() st.autoAH = not st.autoAH; ShowInfo() end, st.autoAH, "Open the writ list when you open the Auction House.")
+  AddFilter("Auto-open at AH", 104, function() st.autoAH = not st.autoAH; WM.UpdateAutoAH(); ShowInfo() end, st.autoAH, "Open the writ list when you open the Auction House.")
   AddFilter("Auto-open at camp", 112, function() st.autoCamp = not st.autoCamp; ShowInfo() end, st.autoCamp, "Open WritMaster when you talk to a camp vendor or the crate hand-in NPC.")
   AddFilter("Minimap", 60, function() st.minimap = not st.minimap; if WM.UpdateMinimap then WM.UpdateMinimap() end; ShowInfo() end, st.minimap)
   AddFilter("Row tips need Shift", 124, function() st.tipShift = not st.tipShift; ShowInfo() end, st.tipShift,
