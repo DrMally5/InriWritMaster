@@ -1,0 +1,16 @@
+## Interface: 16001
+## Title: |cffd4af37Inri's|r WritMaster
+## Notes: Cheapest-rep planner for Azeroth Commerce Authority / Durotar Supply and Logistics: Craftsman's Writs, Waylaid crates, Merchant's Favor vendors. /writ
+## Author: Inri
+## Version: @project-version@
+## IconTexture: Interface\Icons\INV_Scroll_08
+## SavedVariables: InriWritMasterDB
+## SavedVariablesPerCharacter: InriWritMasterCharDB
+## OptionalDeps: Auctionator, TomTom
+## AddonCompartmentFunc: InriWritMaster_OnCompartmentClick
+## Category: Professions
+## X-License: MIT
+
+Data.lua
+InriWritMaster.lua
+Features.lua

@@ -1,0 +1,15 @@
+package-as: InriWritMaster
+
+enable-nolib-creation: no
+
+ignore:
+  - README.md
+  - CHANGELOG.md
+  - .github
+  - .gitignore
+  - tests
+  - media
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
