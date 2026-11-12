@@ -1349,7 +1349,7 @@ local function ShowVendors()
       it[4] and col("white", it[4]) or col("grey", "—"),
       status,
       Money(AHPrice(it[1]), true),
-      (it[6] and col("orange", it[6])) or (it[5] and col("grey", it[5] == "A" and "Alliance" or "Horde")) or "",
+      (it[6] and not (learnedCost and it[6]:find("Favor cost")) and col("orange", it[6])) or (it[5] and col("grey", it[5] == "A" and "Alliance" or "Horde")) or "",
       icon = ItemIcon(it[1]),
       dim = it[5] and ((it[5] == "A") ~= (faction == "Alliance")),
     }

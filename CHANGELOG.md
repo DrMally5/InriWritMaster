@@ -1,5 +1,10 @@
 # Inri's WritMaster
 
+## v1.0.3 (2026-11-12)
+
+- Formula: Enchant Boots - Speed now shows its Honored requirement.
+- Gnomish Army Knife and Loot-A-Rang schematics (Honored) and Disorienting Smog Potion (Friendly) are now listed with their skill and reputation requirements. Their Favor cost is confirmed automatically the first time you open the vendor.
+
 ## v1.0.2 (2026-11-12)
 
 - Crates tab can plan your day too: Shift-click or Ctrl-click crates and press Do today. Planned crates (and the cheapest way to fill them) go into the WritMaster shopping list with your writs.
