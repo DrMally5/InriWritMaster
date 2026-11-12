@@ -58,6 +58,10 @@ Type `/writ` to open it, or click the minimap button.
 
 Writ quests, items and Journeyman customer locations come from game data and community sources. Expert and Artisan customers, Artisan crate payouts and a few vendor prices are not confirmed yet. The addon learns customers as you play, and the static data will be updated as more becomes known. Corrections are welcome in [Issues](../../issues).
 
+## Credits
+
+Development is done by a hardworking AI (& 1 lazy human).
+
 ## License
 
 MIT, see [LICENSE](LICENSE).

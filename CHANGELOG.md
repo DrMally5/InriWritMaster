@@ -1,5 +1,9 @@
 # Inri's WritMaster
 
+## v1.0.2 (2026-11-12)
+
+- About section on the Info tab with version and credits. Development is done by a hardworking AI (& 1 lazy human).
+
 ## v1.0.1 (2026-11-12)
 
 - New "AH auto: on/off" button in the title bar to choose whether WritMaster opens by itself at the Auction House.
