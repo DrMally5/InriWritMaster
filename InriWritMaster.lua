@@ -249,8 +249,15 @@ function WM.Plan()
   local c = WM.cdb
   if not c then return {} end
   local k = PlanKey()
-  if not c.plan or c.plan.key ~= k then c.plan = { key = k, q = {} } end
+  if not c.plan or c.plan.key ~= k then c.plan = { key = k, q = {}, c = {} } end
   return c.plan.q
+end
+function WM.CratePlan()
+  local c = WM.cdb
+  if not c then return {} end
+  WM.Plan()
+  c.plan.c = c.plan.c or {}
+  return c.plan.c
 end
 function WM.TogglePlan(q)
   local p = WM.Plan()
@@ -258,6 +265,12 @@ function WM.TogglePlan(q)
   return p[q]
 end
 function WM.PlanCount() local n = 0 for _ in pairs(WM.Plan()) do n = n + 1 end return n end
+function WM.CratePlanCount() local n = 0 for _ in pairs(WM.CratePlan()) do n = n + 1 end return n end
+local function ShopLabel()
+  local n = WM.PlanCount() + WM.CratePlanCount()
+  return n > 0 and ("Shop list (" .. n .. ")") or "Shop list"
+end
+local function PlanFor(tab) return tab == 2 and WM.CratePlan() or WM.Plan() end
 
 local function Customer(w)
   local l = WM.db.learned[w.q]
@@ -877,21 +890,23 @@ local function BuildFrame()
   UI.btnPlan = Button(f, "Do today", 70, 20, function()
     local m = UI.list.multi
     if m and next(m) then
-      local plan, all = WM.Plan(), true
+      local plan, all = PlanFor(UI.tab), true
       for q in pairs(m) do if not plan[q] then all = false end end
       for q in pairs(m) do plan[q] = (not all) or nil end
       WM:Refresh(); return
     end
     local e = UI.selected
-    if not (e and e.w) then Print("Select a writ first (Ctrl-click to pick several, or Shift-click rows).") return end
-    WM.TogglePlan(e.w.q); WM:Refresh()
+    if not (e and e.key) then Print("Select a row first (Ctrl-click to pick several, or Shift-click rows).") return end
+    local plan = PlanFor(UI.tab)
+    if plan[e.key] then plan[e.key] = nil else plan[e.key] = true end
+    WM:Refresh()
   end)
   UI.btnPlan:SetPoint("BOTTOMRIGHT", -304, 12)
   UI.btnPlan:HookScript("OnEnter", function(s) GameTooltip:SetOwner(s, "ANCHOR_TOP"); GameTooltip:SetText("Do today", 1, 0.82, 0)
-    GameTooltip:AddLine("Adds the selected writ(s) to today's list (or removes them). Ctrl-click rows to select several first, or Shift-click a row to toggle it directly. The list clears at daily reset.", 1, 1, 1, true); GameTooltip:Show() end)
+    GameTooltip:AddLine("Adds the selected writ(s) or crate(s) to today's list (or removes them). Ctrl-click rows to select several first, or Shift-click a row to toggle it directly. The list clears at daily reset.", 1, 1, 1, true); GameTooltip:Show() end)
   UI.btnPlan:HookScript("OnLeave", function() GameTooltip:Hide() end)
   UI.btnList:HookScript("OnEnter", function(s) GameTooltip:SetOwner(s, "ANCHOR_TOP"); GameTooltip:SetText("Shop list", 1, 0.82, 0)
-    GameTooltip:AddLine("Creates an Auctionator shopping list called 'WritMaster' for today's writs: the writ itself if you don't have it, plus the item (or its materials if crafting is cheaper). With nothing planned it uses the writs in your bags. It is refreshed automatically when you open the Auction House.", 1, 1, 1, true); GameTooltip:Show() end)
+    GameTooltip:AddLine("Creates an Auctionator shopping list called 'WritMaster' for today's writs and crates: the writ or crate itself if you don't have it, plus the item (or its materials if crafting is cheaper) and the cheapest crate filling. With nothing planned it uses the writs in your bags. It is refreshed automatically when you open the Auction House.", 1, 1, 1, true); GameTooltip:Show() end)
   UI.btnList:HookScript("OnLeave", function() GameTooltip:Hide() end)
   UI.btnRoute = Button(f, "Route", 66, 20, function() WM:Route() end)
   UI.btnRoute:SetPoint("BOTTOMRIGHT", -12, 12)
@@ -1067,6 +1082,20 @@ end
 local function ShowMulti()
   local m = UI.list.multi
   if not (m and next(m)) then return end
+  if UI.tab == 2 then
+    local n, fav, cost, plan, all = 0, 0, 0, WM.CratePlan(), true
+    for id in pairs(m) do
+      for _, r in ipairs(UI.list.data) do
+        if r.key == id then n = n + 1; fav = fav + (r.c.favor or 0); cost = cost + (r.total or 0) end
+      end
+      if not plan[id] then all = false end
+    end
+    UI.detail1:SetText(fmt("%s %d crates, %s Favor for about %s", col("gold", "Selected:"), n, col("white", fav), Money(cost)))
+    UI.detail2:SetText("Ctrl-click to add or remove rows. Click a row without Ctrl to go back to one.")
+    UI.btnPlan.text:SetText(all and "Drop" or "Do today")
+    UI.list:Render()
+    return
+  end
   local n, rep, cost, plan, all = 0, 0, 0, WM.Plan(), true
   for q in pairs(m) do
     local w = WM.byQuest[q]
@@ -1125,7 +1154,7 @@ local function ShowWrits()
   for _, e in ipairs(rows) do e.key = e.w.q end
   UI.list:SetData(rows)
   UI.btnRoute:Show(); UI.btnShop:Show(); UI.btnWay:Show(); UI.btnList:Show(); UI.btnPlan:Show(); UI.btnPlan.text:SetText("Do today")
-  UI.btnList.text:SetText(WM.PlanCount() > 0 and ("Shop list (" .. WM.PlanCount() .. ")") or "Shop list")
+  UI.btnList.text:SetText(ShopLabel())
   if not UI.selected or not UI.selected.w then
     local own, done = 0, 0
     for _, w in ipairs(WM.WRITS) do
@@ -1199,7 +1228,8 @@ local function EvalCrate(c)
   return e
 end
 
-local function ShowCrates()
+local ShowCrates
+function ShowCrates()
   ClearFilters()
   local note = AddFilter("Crates give Merchant's Favor, not rep", 230, function() end, false,
     "Reputation comes from writs. Crates are for Favor (recipes, mount, pet, toy, titles). After Friendly, a Forged Delivery Receipt turns an empty crate into 50 rep.")
@@ -1210,10 +1240,11 @@ local function ShowCrates()
     local fill = e.opt and fmt("%d x %s", e.opt[2], ItemName(e.opt[1]) or e.opt[1]) or col("grey", "no AH data for any option")
     local eff = e.eff == huge and col("green", "free") or (e.eff and col("white", fmt("%.1f", e.eff)) or col("grey", "—"))
     return {
-      col("white", c.name), col("grey", c.lvl), c.favor and col("gold", c.favor) or col("grey", "?"),
+      (WM.CratePlan()[c.id] and col("gold", "> ") or "") .. col("white", c.name), col("grey", c.lvl), c.favor and col("gold", c.favor) or col("grey", "?"),
       fill, Money(e.fill, true), Money(e.crate, true), Money(e.total, true), eff,
       e.have > 0 and col("green", e.have) or col("grey", "0"),
       icon = ItemIcon(c.id),
+      planned = WM.CratePlan()[c.id] == true,
     }
   end
   UI.tooltipFn = function(row, e)
@@ -1231,9 +1262,29 @@ local function ShowCrates()
     end
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine(col("grey", "Turn in to " .. WM.CAMP[PlayerFaction()].intake .. " at " .. WM.CAMP[PlayerFaction()].where), 1, 1, 1, true)
+    if WM.CratePlan()[c.id] then GameTooltip:AddLine(col("gold", "On today's list")) end
+    GameTooltip:AddLine(col("grey", "Click: select · Ctrl-click: select several · Shift-click: add/remove from today"))
     GameTooltip:Show()
   end
-  UI.clickFn = function(e) UI.list.selected = e.key; UI.list:Render() end
+  UI.clickFn = function(e, btn)
+    if btn == "LeftButton" and IsShiftKeyDown and IsShiftKeyDown() then
+      local p = WM.CratePlan(); if p[e.key] then p[e.key] = nil else p[e.key] = true end
+      UI.selected, UI.list.selected, UI.list.multi = nil, nil, false; ShowCrates(); return
+    end
+    if btn == "LeftButton" and IsControlKeyDown and IsControlKeyDown() then
+      local m = UI.list.multi or {}
+      UI.list.multi = m
+      if UI.selected and UI.selected.key then m[UI.selected.key] = true end
+      if m[e.key] then m[e.key] = nil else m[e.key] = true end
+      UI.selected, UI.list.selected = nil, nil
+      if next(m) then ShowMulti() else UI.list.multi = false; ShowCrates() end
+      return
+    end
+    UI.list.multi = false
+    UI.selected = e; UI.list.selected = e.key
+    UI.btnPlan.text:SetText(WM.CratePlan()[e.key] and "Drop" or "Do today")
+    UI.list:Render()
+  end
   local rows = {}
   for _, c in ipairs(WM.CRATES) do rows[#rows + 1] = EvalCrate(c) end
   table.sort(rows, function(a, b)
@@ -1243,10 +1294,19 @@ local function ShowCrates()
   end)
   UI.list:SetData(rows)
   local camp = WM.CAMP[PlayerFaction()]
-  UI.detail1:SetText(fmt("Hand in filled crates to %s, %s.", col("white", camp.intake), col("gold", camp.where)))
+  local pn, pfav, pcost = 0, 0, 0
+  for _, r in ipairs(rows) do
+    if WM.CratePlan()[r.key] then pn = pn + 1; pfav = pfav + (r.c.favor or 0); pcost = pcost + (r.total or 0) end
+  end
+  if pn > 0 then
+    UI.detail1:SetText(fmt("%s %d crates, %s Favor for about %s. Hand in to %s.", col("gold", "Today:"), pn, col("white", pfav), Money(pcost), col("white", camp.intake)))
+  else
+    UI.detail1:SetText(fmt("Hand in filled crates to %s, %s. Shift-click crates to plan today.", col("white", camp.intake), col("gold", camp.where)))
+  end
   UI.detail2:SetText("Sorted by Merchant's Favor per gold. Crates you already hold count as free. Green crates give double Favor.")
   UI.wayTarget = { camp.map, camp.x, camp.y, camp.intake }
-  UI.btnWay:SetEnabled(true); UI.btnShop:Hide(); UI.btnRoute:Hide(); UI.btnWay:Show(); UI.btnList:Hide(); UI.btnPlan:Hide()
+  UI.btnWay:SetEnabled(true); UI.btnShop:Hide(); UI.btnRoute:Hide(); UI.btnWay:Show()
+  UI.btnList:Show(); UI.btnPlan:Show(); UI.btnPlan.text:SetText("Do today"); UI.btnList.text:SetText(ShopLabel())
 end
 
 ---------------------------------------------------------------------------
@@ -1415,7 +1475,11 @@ function WM:Refresh()
   if sel and sel.w and UI.tab == 1 then
     for _, e in ipairs(UI.list.data) do if e.key == sel.w.q then SelectWrit(e) break end end
   end
-  if UI.tab == 1 then ShowMulti() end
+  if sel and sel.c and UI.tab == 2 and not (UI.list.multi and next(UI.list.multi)) then
+    for _, e in ipairs(UI.list.data) do if e.key == sel.key then UI.selected = e; UI.list.selected = e.key
+      UI.btnPlan.text:SetText(WM.CratePlan()[e.key] and "Drop" or "Do today"); UI.list:Render() break end end
+  end
+  if UI.tab == 1 or UI.tab == 2 then ShowMulti() end
   UpdateHeader()
 end
 
@@ -1442,7 +1506,7 @@ end
 -- shared helpers for Features.lua
 WM.H = { EvalWrit = EvalWrit, Customer = Customer, ItemName = ItemName, ItemLink = ItemLink, Money = Money, Print = Print,
          col = col, ZoneName = ZoneName, CraftCost = CraftCost, ScanBags = ScanBags, IsDoneToday = IsDoneToday,
-         PlayerFaction = PlayerFaction, ReagentPrice = ReagentPrice, UI = UI }
+         PlayerFaction = PlayerFaction, ReagentPrice = ReagentPrice, UI = UI, EvalCrate = EvalCrate }
 
 ---------------------------------------------------------------------------
 -- Events

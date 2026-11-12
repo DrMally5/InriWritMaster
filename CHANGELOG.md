@@ -2,6 +2,7 @@
 
 ## v1.0.2 (2026-11-12)
 
+- Crates tab can plan your day too: Shift-click or Ctrl-click crates and press Do today. Planned crates (and the cheapest way to fill them) go into the WritMaster shopping list with your writs.
 - About section on the Info tab with version and credits. Development is done by a hardworking AI (& 1 lazy human).
 
 ## v1.0.1 (2026-11-12)

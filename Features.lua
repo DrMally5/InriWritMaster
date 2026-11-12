@@ -157,8 +157,8 @@ function WM:ShoppingList(auto)
   local need = {}          -- itemID -> quantity
   local names = {}         -- itemID -> fallback search name
   local function want(id, q) need[id] = (need[id] or 0) + q end
-  local plan = WM.Plan()
-  local usePlan = next(plan) ~= nil
+  local plan, cplan = WM.Plan(), WM.CratePlan()
+  local usePlan = next(plan) ~= nil or next(cplan) ~= nil
   local count = 0
   for _, w in ipairs(WM.WRITS) do
     local ownWrit = (WM.owned[w.w] or 0) > 0
@@ -183,6 +183,17 @@ function WM:ShoppingList(auto)
       end
     end
   end
+  -- planned crates: the crate itself if not in bags, plus its cheapest fill option
+  local crates = 0
+  for _, c in ipairs(WM.CRATES) do
+    if cplan[c.id] then
+      crates = crates + 1
+      local e = H.EvalCrate(c)
+      if (WM.owned[c.id] or 0) == 0 then want(c.id, 1) end
+      local o = e.opt or c.opts[1]
+      if o then want(o[1], o[2]) end
+    end
+  end
   -- subtract materials already in bags
   local terms = {}
   for id, q in pairs(need) do
@@ -200,8 +211,12 @@ function WM:ShoppingList(auto)
   end
   local ok, err = pcall(api.CreateShoppingList, "InriWritMaster", "WritMaster", terms)
   if ok then
-    H.Print(fmt("Shopping list %s %s with %d items for %d %s. Open it in Auctionator's Shopping tab.", col("white", "'WritMaster'"),
-      auto and "refreshed" or "created", #terms, count, usePlan and "planned writs" or "writs in your bags"))
+    local parts = {}
+    if count > 0 then parts[#parts + 1] = fmt("%d %swrit%s", count, usePlan and "planned " or "", count == 1 and "" or "s") end
+    if crates > 0 then parts[#parts + 1] = fmt("%d crate%s", crates, crates == 1 and "" or "s") end
+    local what = table.concat(parts, " and ") .. (usePlan and "" or " in your bags")
+    H.Print(fmt("Shopping list %s %s with %d items for %s. Open it in Auctionator's Shopping tab.", col("white", "'WritMaster'"),
+      auto and "refreshed" or "created", #terms, what))
   else
     H.Print("Could not create the shopping list: " .. tostring(err))
   end
@@ -302,7 +317,7 @@ ev:SetScript("OnEvent", function(_, event)
       end
     end)
   elseif event == "AUCTION_HOUSE_SHOW" then
-    if next(WM.Plan()) then C_Timer.After(0.5, function() pcall(WM.ShoppingList, WM, true) end) end
+    if next(WM.Plan()) or next(WM.CratePlan()) then C_Timer.After(0.5, function() pcall(WM.ShoppingList, WM, true) end) end
     if st.autoAH and not IsOpen() then WM:Open(1); autoOpened = true end
   elseif event == "MERCHANT_SHOW" or event == "GOSSIP_SHOW" or event == "QUEST_GREETING" then
     if st.autoCamp and not IsOpen() then
