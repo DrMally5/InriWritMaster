@@ -38,7 +38,7 @@ local DEFAULTS = {
   learned = {},        -- [questID] = {name, mapID, x, y}
   recipes = {},        -- [itemID] = {yield, {{reagentID, qty}, ...}}
   vendorCost = {},     -- [itemID] = favor cost seen at a vendor
-  settings = { tier = "ALL", ownedOnly = false, hideDone = false, craftOnly = false, sort = "eff", sortAsc = false, autoAH = true, autoCamp = true, minimap = true, minimapAngle = 200, tooltips = true, tipShift = true, crateBags = true,
+  settings = { tier = "ALL", ownedOnly = false, hideDone = false, craftOnly = false, sort = "eff", sortAsc = false, autoAH = true, autoCamp = true, minimap = true, minimapAngle = 200, tooltips = true, tipShift = true, crateUseBags = false,
                vendorProf = 1, ownedWritFree = true },
   pos = nil,
 }
@@ -1221,7 +1221,7 @@ local function EvalCrate(c)
   local e = { c = c, key = c.id }
   for _, o in ipairs(c.opts) do
     local p = AHPrice(o[1])
-    local have = WM.db.settings.crateBags and (WM.owned[o[1]] or 0) or 0
+    local have = WM.db.settings.crateUseBags and (WM.owned[o[1]] or 0) or 0
     local cost = p and p * max(0, o[2] - have) or ((have >= o[2]) and 0 or nil)
     if cost and (not e.fill or cost < e.fill) then e.fill, e.opt = cost, o end
   end
@@ -1241,14 +1241,14 @@ function ShowCrates()
     "Reputation comes from writs. Crates are for Favor (recipes, mount, pet, toy, titles). After Friendly, a Forged Delivery Receipt turns an empty crate into 50 rep.")
   note:SetActive(false)
   local st = WM.db.settings
-  AddFilter("Use my bags", 86, function() st.crateBags = not st.crateBags; ShowCrates() end, st.crateBags,
+  AddFilter("Use my bags", 86, function() st.crateUseBags = not st.crateUseBags; ShowCrates() end, st.crateUseBags,
     "On: materials already in your bags count as free, so only what you still need to buy is priced. Off: every option is priced at full AH value, which shows the true cheapest material to fill with.")
   UI.list:SetColumns(CRATE_COLS)
   UI.list.cellFn = function(e)
     local c = e.c
     local fill
     if e.opt then
-      local have = WM.db.settings.crateBags and (WM.owned[e.opt[1]] or 0) or 0
+      local have = WM.db.settings.crateUseBags and (WM.owned[e.opt[1]] or 0) or 0
       fill = fmt("%d x %s", e.opt[2], ItemName(e.opt[1]) or e.opt[1])
       if have > 0 then fill = fill .. col("green", fmt(" (have %d)", min(have, e.opt[2]))) end
     else

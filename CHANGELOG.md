@@ -2,7 +2,7 @@
 
 ## v1.0.4 (2026-11-13)
 
-- Crates tab: new "Use my bags" toggle. Turn it off to price every filling option at full AH value and see the truly cheapest material.
+- Crates tab: filling options are now priced at full AH value by default, so the truly cheapest material wins. Turn on the new "Use my bags" toggle to count materials you already have as free.
 - Crates tab: the cheapest fill now says how many of the items you already have, since those are subtracted from the fill cost.
 
 ## v1.0.3 (2026-11-12)
