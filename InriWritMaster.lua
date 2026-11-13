@@ -962,6 +962,12 @@ local function UpdateHeader()
   end
   local fav, icon = GetFavor()
   local ah = HasAuctionator() and "" or col("red", "Auctionator not loaded   ")
+  if ah == "" then
+    -- freshness of writ prices: newest age among the three sealed writs
+    local age
+    for _, id in pairs(WM.SEALED) do local a = AHAge(id); if a and (not age or a < age) then age = a end end
+    if age and age >= 1 then ah = col("orange", fmt("prices %dd old   ", age)) end
+  end
   local reset = WM.ResetText and WM.ResetText() or ""
   WM.UpdateAutoAH()
   UI.favor:SetText(ah .. reset .. (fav and fmt("%s %s", col("white", fav), icon and ("|T" .. icon .. ":12|t") or col("gold", "Favor")) or ""))
@@ -1526,6 +1532,14 @@ ev:SetScript("OnEvent", function(_, event, arg1)
                          "MERCHANT_SHOW", "GET_ITEM_INFO_RECEIVED", "QUEST_ACCEPTED", "QUEST_LOG_UPDATE", "UPDATE_FACTION", "CURRENCY_DISPLAY_UPDATE",
                          "AUCTION_HOUSE_CLOSED" }) do
       pcall(ev.RegisterEvent, ev, e)
+    end
+    -- refresh as soon as Auctionator stores new prices (full scan or a search)
+    if HasAuctionator() then
+      local api = Auctionator.API.v1
+      local reg = api.RegisterForDBUpdate or api.RegisterForDBUpdates
+      if type(reg) == "function" then
+        pcall(reg, CALLER, function() wipe(priceCache); priceCacheTime = 0; WM:QueueRefresh() end)
+      end
     end
     -- warm item cache for names
     for _, w in ipairs(WM.WRITS) do ItemName(w.i) end

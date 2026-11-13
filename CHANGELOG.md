@@ -2,6 +2,8 @@
 
 ## v1.0.3 (2026-11-12)
 
+- Prices refresh the moment Auctionator records new data, instead of when the window is reopened.
+- The title bar warns when your AH prices are a day or more old.
 - Formula: Enchant Boots - Speed now shows its Honored requirement.
 - Gnomish Army Knife and Loot-A-Rang schematics (Honored) and Disorienting Smog Potion (Friendly) are now listed with their skill and reputation requirements. Their Favor cost is confirmed automatically the first time you open the vendor.
 
