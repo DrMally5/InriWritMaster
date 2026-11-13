@@ -1243,7 +1243,14 @@ function ShowCrates()
   UI.list:SetColumns(CRATE_COLS)
   UI.list.cellFn = function(e)
     local c = e.c
-    local fill = e.opt and fmt("%d x %s", e.opt[2], ItemName(e.opt[1]) or e.opt[1]) or col("grey", "no AH data for any option")
+    local fill
+    if e.opt then
+      local have = WM.owned[e.opt[1]] or 0
+      fill = fmt("%d x %s", e.opt[2], ItemName(e.opt[1]) or e.opt[1])
+      if have > 0 then fill = fill .. col("green", fmt(" (have %d)", min(have, e.opt[2]))) end
+    else
+      fill = col("grey", "no AH data for any option")
+    end
     local eff = e.eff == huge and col("green", "free") or (e.eff and col("white", fmt("%.1f", e.eff)) or col("grey", "—"))
     return {
       (WM.CratePlan()[c.id] and col("gold", "> ") or "") .. col("white", c.name), col("grey", c.lvl), c.favor and col("gold", c.favor) or col("grey", "?"),

@@ -1,5 +1,9 @@
 # Inri's WritMaster
 
+## v1.0.4 (2026-11-13)
+
+- Crates tab: the cheapest fill now says how many of the items you already have, since those are subtracted from the fill cost.
+
 ## v1.0.3 (2026-11-12)
 
 - Prices refresh the moment Auctionator records new data, instead of when the window is reopened.
