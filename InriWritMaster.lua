@@ -108,8 +108,8 @@ local function Money(c, short)
   c = floor(c + 0.5)
   local g, s, cp = floor(c / GOLD), floor((c % GOLD) / 100), c % 100
   if g > 0 then
-    if short or g >= 100 then return fmt("%s%s", col("white", g), col("gold", "g")) end
-    return fmt("%s%s %s%s", col("white", g), col("gold", "g"), col("white", s), col("ffc0c0c0", "s"))
+    if g >= 100 then return fmt("%s%s", col("white", g), col("gold", "g")) end
+    return fmt("%s%s %s%s", col("white", g), col("gold", "g"), col("white", short and fmt("%02d", s) or s), col("ffc0c0c0", "s"))
   elseif s > 0 then
     return fmt("%s%s %s%s", col("white", s), col("ffc0c0c0", "s"), col("white", cp), col("ffb87333", "c"))
   end
@@ -1131,6 +1131,11 @@ local function ShowWrits()
   AddFilter("Hide done", 64, function() s.hideDone = not s.hideDone; ShowWrits() end, s.hideDone, "Hide writs already turned in today.")
   AddFilter("Today", 50, function() s.planOnly = not s.planOnly; ShowWrits() end, s.planOnly,
     "Only the writs you picked for today (Shift-click a row or use the Do today button).")
+  AddFilter("Drop all", 58, function()
+    local p = WM.Plan(); for q in pairs(p) do p[q] = nil end
+    UI.selected, UI.list.selected, UI.list.multi = nil, nil, false
+    ShowWrits()
+  end, false, "Remove every writ from today's list.")
   AddFilter("Craft", 46, function() s.craftOnly = not s.craftOnly; ShowWrits() end, s.craftOnly,
     "Prefer crafting cost over AH price for recipes you know.")
   AddFilter("Free writs", 70, function() s.ownedWritFree = not s.ownedWritFree; ShowWrits() end, s.ownedWritFree,
@@ -1243,6 +1248,11 @@ function ShowCrates()
   local note = AddFilter("Crates give Merchant's Favor, not rep", 230, function() end, false,
     "Reputation comes from writs. Crates are for Favor (recipes, mount, pet, toy, titles). After Friendly, a Forged Delivery Receipt turns an empty crate into 50 rep.")
   note:SetActive(false)
+  AddFilter("Drop all", 58, function()
+    local p = WM.CratePlan(); for id in pairs(p) do p[id] = nil end
+    UI.selected, UI.list.selected, UI.list.multi = nil, nil, false
+    ShowCrates()
+  end, false, "Remove every crate from today's list.")
   UI.list:SetColumns(CRATE_COLS)
   UI.list.cellFn = function(e)
     local c = e.c

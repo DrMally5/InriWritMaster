@@ -1,5 +1,10 @@
 # Inri's WritMaster
 
+## v1.0.5 (2026-11-14)
+
+- "Drop all" button on the Writs and Crates tabs clears today's list in one click.
+- Costs of 1g or more now show the silver too (1g 04s instead of 1g).
+
 ## v1.0.4 (2026-11-13)
 
 - All 259 Merchant's Favor prices checked against the live camp vendors: every listed price is correct. Gnomish Army Knife, Loot-A-Rang and Disorienting Smog Potion are in the game files but not sold by the camp vendors yet, and are marked that way.
