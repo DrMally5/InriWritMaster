@@ -582,7 +582,7 @@ end
 
 local function ScanMerchant()
   if not GetMerchantNumItems then return end
-  local n = 0
+  local n, found = 0, 0
   for i = 1, GetMerchantNumItems() do
     local link = GetMerchantItemLink(i)
     local id = link and tonumber(link:match("item:(%d+)"))
@@ -591,6 +591,7 @@ local function ScanMerchant()
         local _, value, clink, cname = GetMerchantItemCostItem(i, j)
         local isFavor = (clink and clink:find("currency:" .. WM.FAVOR_CURRENCY)) or (cname and cname:find("Merchant's Favor"))
         if isFavor and value then
+          found = found + 1
           if WM.db.vendorCost[id] ~= value then n = n + 1 end
           WM.db.vendorCost[id] = value
         end
@@ -598,7 +599,9 @@ local function ScanMerchant()
     end
   end
   if n > 0 then Print(fmt("Updated %d Merchant's Favor prices from this vendor.", n)) end
+  return found
 end
+WM.ScanMerchant = ScanMerchant
 
 ---------------------------------------------------------------------------
 -- UI helpers
@@ -1572,7 +1575,8 @@ ev:SetScript("OnEvent", function(_, event, arg1)
       WM:QueueRefresh()
     end)
   elseif event == "MERCHANT_SHOW" then
-    C_Timer.After(0.3, ScanMerchant)
+    -- item data can arrive late on the first visit, so scan again a moment later
+    C_Timer.After(0.3, ScanMerchant); C_Timer.After(2, ScanMerchant)
   elseif event == "AUCTION_HOUSE_CLOSED" then
     wipe(priceCache); WM:QueueRefresh()
   else
@@ -1593,6 +1597,20 @@ SlashCmdList.INRIWRITMASTER = function(msg)
   elseif msg == "reset" then WM.db.pos = nil; if UI.frame then UI.frame:ClearAllPoints(); UI.frame:SetPoint("CENTER") end
   elseif msg == "forget" then wipe(WM.db.learned); Print("Learned customer locations cleared.")
   elseif msg == "list" then WM:ShoppingList()
+  elseif msg == "vendor" then
+    -- diagnostics: what the merchant API reports for the open vendor
+    if not (MerchantFrame and MerchantFrame:IsShown()) then Print("Open a camp vendor first, then type /writ vendor.") return end
+    local found = ScanMerchant() or 0
+    Print(fmt("Vendor has %d items, %d priced in Merchant's Favor.", GetMerchantNumItems() or 0, found))
+    for i = 1, min(3, GetMerchantNumItems() or 0) do
+      local link = GetMerchantItemLink(i)
+      local parts = {}
+      for j = 1, (GetMerchantItemCostInfo(i) or 0) do
+        local _, value, clink, cname = GetMerchantItemCostItem(i, j)
+        parts[#parts + 1] = fmt("%s x%s (%s)", tostring(cname), tostring(value), clink and clink:match("(%a+:%d+)") or "no link")
+      end
+      Print(fmt("  %s: %s", link or ("item " .. i), #parts > 0 and table.concat(parts, ", ") or "gold only"))
+    end
   elseif msg == "clear" then if WM.cdb then WM.cdb.plan = nil end; Print("Today's list cleared."); if UI.frame and UI.frame:IsShown() and UI.tab == 1 then WM:ShowTab(1) end
   elseif msg == "mm" or msg == "minimap" then WM.db.settings.minimap = not WM.db.settings.minimap; if WM.UpdateMinimap then WM.UpdateMinimap() end
   elseif msg == "help" then
