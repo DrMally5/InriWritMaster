@@ -4,6 +4,7 @@
 
 - "Drop all" button at the bottom of the Writs and Crates tabs clears today's list in one click.
 - Costs of 1g or more now show the silver too (1g 04s instead of 1g).
+- Writs and crates are now always priced at full AH value, even if the writ, item or crate is already in your bags. The "Free writs" filter is gone.
 - Vendors tab: items you can afford but don't have the reputation for yet now say "needs Honored" (or Revered/Exalted) instead of "affordable".
 - `/writ clear` now updates the open window on the Crates tab too.
 - `/writ vendor` is listed in `/writ help` and on the Info tab.

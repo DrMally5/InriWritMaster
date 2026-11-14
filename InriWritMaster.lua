@@ -39,7 +39,7 @@ local DEFAULTS = {
   recipes = {},        -- [itemID] = {yield, {{reagentID, qty}, ...}}
   vendorCost = {},     -- [itemID] = favor cost seen at a vendor
   settings = { tier = "ALL", ownedOnly = false, hideDone = false, craftOnly = false, sort = "eff", sortAsc = false, autoAH = true, autoCamp = true, minimap = true, minimapAngle = 200, tooltips = true, tipShift = true,
-               vendorProf = 1, ownedWritFree = true },
+               vendorProf = 1 },
   pos = nil,
 }
 local CHAR_DEFAULTS = { known = {} }    -- [itemID] = true for recipes this character knows
@@ -297,9 +297,8 @@ local function EvalWrit(w)
   -- writ cost
   local ownedWrit = (WM.owned[w.w] or 0) > 0
   e.owned = ownedWrit
-  if ownedWrit and WM.db.settings.ownedWritFree then
-    e.writCost, e.writSrc = 0, "in bags"
-  else
+  -- writs and items in your bags are not free: always price them at AH value
+  do
     local named = AHPrice(w.w)
     local sealed = AHPrice(WM.SEALED[w.t])
     if named then
@@ -315,11 +314,8 @@ local function EvalWrit(w)
   local craft, parts = CraftCost(w.i)
   e.parts = parts
   e.known = known
-  local haveItem = WM.owned[w.i] or 0
-  if haveItem >= qty then
-    e.itemCost, e.itemSrc = 0, "in bags"
-  else
-    local need = qty - haveItem
+  do
+    local need = qty
     local ahTotal = ah and ah * need
     local crTotal = (known and craft) and craft * need or nil
     if WM.db.settings.craftOnly and crTotal then ahTotal = nil end
@@ -1142,8 +1138,6 @@ local function ShowWrits()
     "Only the writs you picked for today (Shift-click a row or use the Do today button).")
   AddFilter("Craft", 46, function() s.craftOnly = not s.craftOnly; ShowWrits() end, s.craftOnly,
     "Prefer crafting cost over AH price for recipes you know.")
-  AddFilter("Free writs", 70, function() s.ownedWritFree = not s.ownedWritFree; ShowWrits() end, s.ownedWritFree,
-    "Count writs already in your bags as free (sunk cost).")
 
   UI.list:SetColumns(WRIT_COLS, function(key)
     if s.sort == key then s.sortAsc = not s.sortAsc else s.sort, s.sortAsc = key, false end
@@ -1239,9 +1233,8 @@ local function EvalCrate(c)
   end
   e.crate = AHPrice(c.id)
   e.have = WM.owned[c.id] or 0
-  local crateCost = e.have > 0 and 0 or e.crate
-  if e.fill and crateCost then e.total = e.fill + crateCost elseif e.fill and e.have == 0 then e.total = nil end
-  if e.fill and e.have > 0 then e.total = e.fill end
+  -- a crate in your bags is not free either
+  if e.fill and e.crate then e.total = e.fill + e.crate end
   if e.total and c.favor then e.eff = e.total > 0 and c.favor / (e.total / GOLD) or huge end
   return e
 end
@@ -1328,7 +1321,7 @@ function ShowCrates()
   else
     UI.detail1:SetText(fmt("Hand in filled crates to %s, %s. Shift-click crates to plan today.", col("white", camp.intake), col("gold", camp.where)))
   end
-  UI.detail2:SetText("Sorted by Merchant's Favor per gold. Crates you already hold count as free. Green crates give double Favor.")
+  UI.detail2:SetText("Sorted by Merchant's Favor per gold. Everything is priced at AH value, even what is already in your bags. Green crates give double Favor.")
   UI.wayTarget = { camp.map, camp.x, camp.y, camp.intake }
   UI.btnWay:SetEnabled(true); UI.btnShop:Hide(); UI.btnRoute:Hide(); UI.btnWay:Show()
   UI.btnList:Show(); UI.btnPlan:Show(); UI.btnDropAll:Show(); UI.btnDropAll:SetEnabled(next(PlanFor(UI.tab)) ~= nil); UI.btnPlan.text:SetText("Do today"); UI.btnList.text:SetText(ShopLabel())
