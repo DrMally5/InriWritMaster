@@ -241,7 +241,7 @@ WM.VENDORS = {
     {250993, 180, "H", 280}, -- Recipe: Major Mender's Potion
     {250994, 180, "H", 275}, -- Recipe: Potion of Venomous Blood
     {250995, 180, "H", 265}, -- Recipe: Caustic Smog Potion
-    {250996, 120, "F", 180, nil, "Favor cost unconfirmed"}, -- Recipe: Disorienting Smog Potion (Friendly, Alchemy 180 per Wowhead; cost assumed like other Friendly alchemy recipes)
+    {250996, nil, "F", 180, nil, "not sold by camp vendors yet"}, -- Recipe: Disorienting Smog Potion (Friendly, Alchemy 180 per Wowhead; cost assumed like other Friendly alchemy recipes)
     {250997, 120, "F", 245}, -- Recipe: Dragonfire Potion
     {250998, 180, "H", 280}, -- Recipe: Potion of Elemental Purging
     {271621, 1000, nil, 300}, -- Alchemy Certification
@@ -365,8 +365,8 @@ WM.VENDORS = {
     {264216, 270, "H", 225}, -- Schematic: Emergency Field Cloak
     {264217, 270, "H", 225}, -- Schematic: Compact Critter Carrier
     {264220, 270, "H", 250}, -- Schematic: SAF-T Disposable Parachute
-    {264221, 270, "H", 250, nil, "Favor cost unconfirmed"}, -- Schematic: Gnomish Army Knife (Honored, Engineering 250 per Wowhead; wow.gg counts 7 Honored schematics at 270)
-    {264222, 270, "H", 275, nil, "Favor cost unconfirmed"}, -- Schematic: Loot-A-Rang (Honored, Engineering 275 per Wowhead)
+    {264221, nil, "H", 250, nil, "not sold by camp vendors yet"}, -- Schematic: Gnomish Army Knife (Honored, Engineering 250 per Wowhead; wow.gg counts 7 Honored schematics at 270)
+    {264222, nil, "H", 275, nil, "not sold by camp vendors yet"}, -- Schematic: Loot-A-Rang (Honored, Engineering 275 per Wowhead)
     {264232, 360, "H", 300}, -- Schematic: Ultrasafe Rechargeable Battery
     {264234, 360, "H", 300}, -- Schematic: Gnomish Poultryizer
     {264235, 360, "H", 300}, -- Schematic: Ultralight Goblin Glider

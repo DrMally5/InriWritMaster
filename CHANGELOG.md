@@ -2,6 +2,7 @@
 
 ## v1.0.4 (2026-11-13)
 
+- All 259 Merchant's Favor prices checked against the live camp vendors: every listed price is correct. Gnomish Army Knife, Loot-A-Rang and Disorienting Smog Potion are in the game files but not sold by the camp vendors yet, and are marked that way.
 - Vendor Favor prices are read again a moment after opening the vendor, in case item data loads late. New `/writ vendor` command shows what the vendor scan sees.
 - Crates tab: filling options are now priced at full AH value by default, so the truly cheapest material wins. Turn on the new "Use my bags" toggle to count materials you already have as free.
 - Crates tab: the cheapest fill now says how many of the items you already have, since those are subtracted from the fill cost.
