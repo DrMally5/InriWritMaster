@@ -880,9 +880,9 @@ local function BuildFrame()
 
   Line(f, -(H - 54))
   UI.detail1 = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  UI.detail1:SetPoint("BOTTOMLEFT", 12, 34); UI.detail1:SetPoint("RIGHT", -380, 0); UI.detail1:SetJustifyH("LEFT")
+  UI.detail1:SetPoint("BOTTOMLEFT", 12, 34); UI.detail1:SetPoint("RIGHT", -454, 0); UI.detail1:SetJustifyH("LEFT")
   UI.detail2 = f:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  UI.detail2:SetPoint("BOTTOMLEFT", 12, 14); UI.detail2:SetPoint("RIGHT", -380, 0); UI.detail2:SetJustifyH("LEFT")
+  UI.detail2:SetPoint("BOTTOMLEFT", 12, 14); UI.detail2:SetPoint("RIGHT", -454, 0); UI.detail2:SetJustifyH("LEFT")
 
   UI.btnWay = Button(f, "Waypoint", 70, 20, function() if UI.wayTarget then WM:Waypoint(unpack(UI.wayTarget)) end end)
   UI.btnWay:SetPoint("BOTTOMRIGHT", -156, 12)
@@ -905,6 +905,15 @@ local function BuildFrame()
     WM:Refresh()
   end)
   UI.btnPlan:SetPoint("BOTTOMRIGHT", -304, 12)
+  UI.btnDropAll = Button(f, "Drop all", 70, 20, function()
+    local plan = PlanFor(UI.tab); for k in pairs(plan) do plan[k] = nil end
+    UI.list.multi = false
+    WM:Refresh()
+  end)
+  UI.btnDropAll:SetPoint("BOTTOMRIGHT", -378, 12)
+  UI.btnDropAll:HookScript("OnEnter", function(s) GameTooltip:SetOwner(s, "ANCHOR_TOP"); GameTooltip:SetText("Drop all", 1, 0.82, 0)
+    GameTooltip:AddLine(UI.tab == 2 and "Removes every crate from today's list." or "Removes every writ from today's list.", 1, 1, 1, true); GameTooltip:Show() end)
+  UI.btnDropAll:HookScript("OnLeave", function() GameTooltip:Hide() end)
   UI.btnPlan:HookScript("OnEnter", function(s) GameTooltip:SetOwner(s, "ANCHOR_TOP"); GameTooltip:SetText("Do today", 1, 0.82, 0)
     GameTooltip:AddLine("Adds the selected writ(s) or crate(s) to today's list (or removes them). Ctrl-click rows to select several first, or Shift-click a row to toggle it directly. The list clears at daily reset.", 1, 1, 1, true); GameTooltip:Show() end)
   UI.btnPlan:HookScript("OnLeave", function() GameTooltip:Hide() end)
@@ -1131,11 +1140,6 @@ local function ShowWrits()
   AddFilter("Hide done", 64, function() s.hideDone = not s.hideDone; ShowWrits() end, s.hideDone, "Hide writs already turned in today.")
   AddFilter("Today", 50, function() s.planOnly = not s.planOnly; ShowWrits() end, s.planOnly,
     "Only the writs you picked for today (Shift-click a row or use the Do today button).")
-  AddFilter("Drop all", 58, function()
-    local p = WM.Plan(); for q in pairs(p) do p[q] = nil end
-    UI.selected, UI.list.selected, UI.list.multi = nil, nil, false
-    ShowWrits()
-  end, false, "Remove every writ from today's list.")
   AddFilter("Craft", 46, function() s.craftOnly = not s.craftOnly; ShowWrits() end, s.craftOnly,
     "Prefer crafting cost over AH price for recipes you know.")
   AddFilter("Free writs", 70, function() s.ownedWritFree = not s.ownedWritFree; ShowWrits() end, s.ownedWritFree,
@@ -1167,7 +1171,7 @@ local function ShowWrits()
   local rows = WritRows()
   for _, e in ipairs(rows) do e.key = e.w.q end
   UI.list:SetData(rows)
-  UI.btnRoute:Show(); UI.btnShop:Show(); UI.btnWay:Show(); UI.btnList:Show(); UI.btnPlan:Show(); UI.btnPlan.text:SetText("Do today")
+  UI.btnRoute:Show(); UI.btnShop:Show(); UI.btnWay:Show(); UI.btnList:Show(); UI.btnPlan:Show(); UI.btnDropAll:Show(); UI.btnDropAll:SetEnabled(next(PlanFor(UI.tab)) ~= nil); UI.btnPlan.text:SetText("Do today")
   UI.btnList.text:SetText(ShopLabel())
   if not UI.selected or not UI.selected.w then
     local own, done = 0, 0
@@ -1248,11 +1252,6 @@ function ShowCrates()
   local note = AddFilter("Crates give Merchant's Favor, not rep", 230, function() end, false,
     "Reputation comes from writs. Crates are for Favor (recipes, mount, pet, toy, titles). After Friendly, a Forged Delivery Receipt turns an empty crate into 50 rep.")
   note:SetActive(false)
-  AddFilter("Drop all", 58, function()
-    local p = WM.CratePlan(); for id in pairs(p) do p[id] = nil end
-    UI.selected, UI.list.selected, UI.list.multi = nil, nil, false
-    ShowCrates()
-  end, false, "Remove every crate from today's list.")
   UI.list:SetColumns(CRATE_COLS)
   UI.list.cellFn = function(e)
     local c = e.c
@@ -1332,7 +1331,7 @@ function ShowCrates()
   UI.detail2:SetText("Sorted by Merchant's Favor per gold. Crates you already hold count as free. Green crates give double Favor.")
   UI.wayTarget = { camp.map, camp.x, camp.y, camp.intake }
   UI.btnWay:SetEnabled(true); UI.btnShop:Hide(); UI.btnRoute:Hide(); UI.btnWay:Show()
-  UI.btnList:Show(); UI.btnPlan:Show(); UI.btnPlan.text:SetText("Do today"); UI.btnList.text:SetText(ShopLabel())
+  UI.btnList:Show(); UI.btnPlan:Show(); UI.btnDropAll:Show(); UI.btnDropAll:SetEnabled(next(PlanFor(UI.tab)) ~= nil); UI.btnPlan.text:SetText("Do today"); UI.btnList.text:SetText(ShopLabel())
 end
 
 ---------------------------------------------------------------------------
@@ -1360,12 +1359,16 @@ local function ShowVendors()
   local v = WM.VENDORS[s.vendorProf] or WM.VENDORS[1]
   local faction = PlayerFaction()
   local favor = GetFavor() or 0
+  local _, reaction = GetRep()
+  local REPLVL = { F = 5, H = 6, R = 7, E = 8 }
   UI.list:SetColumns(VENDOR_COLS)
   UI.list.cellFn = function(it)
     local cost = WM.db.vendorCost[it[1]] or it[2]
     local learnedCost = WM.db.vendorCost[it[1]] ~= nil
     local status
+    local needRep = it[3] and reaction and REPLVL[it[3]] and reaction < REPLVL[it[3]]
     if not cost then status = col("grey", "cost unknown")
+    elseif needRep and favor >= cost then status = col("orange", "needs " .. (REPNAME[it[3]] or it[3]))
     elseif favor >= cost then status = col("green", "affordable")
     else status = col("red", fmt("need %d Favor", cost - favor)) end
     return {
@@ -1412,7 +1415,7 @@ local function ShowVendors()
     npc[2] and col("grey", fmt("(%.1f, %.1f) %s", npc[2], npc[3], ZoneName(camp.map))) or ""))
   UI.detail2:SetText(fmt("You have %s Merchant's Favor. %d items. Prices are confirmed when you open the vendor.", col("white", favor), #rows))
   UI.wayTarget = npc[2] and { camp.map, npc[2], npc[3], npc[1] } or { camp.map, camp.x, camp.y, camp.intake }
-  UI.btnWay:SetEnabled(true); UI.btnShop:Hide(); UI.btnRoute:Hide(); UI.btnWay:Show(); UI.btnList:Hide(); UI.btnPlan:Hide()
+  UI.btnWay:SetEnabled(true); UI.btnShop:Hide(); UI.btnRoute:Hide(); UI.btnWay:Show(); UI.btnList:Hide(); UI.btnPlan:Hide(); UI.btnDropAll:Hide()
 end
 
 ---------------------------------------------------------------------------
@@ -1461,8 +1464,9 @@ local function ShowInfo()
   add(col("gold", "Commands"))
   add("  /writ (or /writmaster, /iwm)  toggle window       /writ route  delivery route for writs in your bags")
   add("  /writ list  Auctionator shopping list       /writ mm  toggle minimap button")
-  add("  Ctrl-click to select several writs, then Do today; Shift-click toggles one. /writ clear empties the plan")
+  add("  Ctrl-click to select several writs, then Do today; Shift-click toggles one. Drop all or /writ clear empties the plan")
   add("  /writ scan  re-read bags       /writ reset  reset window position       /writ forget  clear learned customers")
+  add("  /writ vendor  print a camp vendor's Favor prices (with the vendor window open)")
   add(" ")
   add(col("gold", "Tips"))
   add("  Open each profession window once so WritMaster can price crafting from materials.")
@@ -1478,7 +1482,7 @@ local function ShowInfo()
   UI.detail1:SetText(fmt("Camp: %s", col("white", camp.where)))
   UI.detail2:SetText("Data decoded from your Questie database and Forever guides. Unconfirmed values are marked and learned in game.")
   UI.wayTarget = { camp.map, camp.x, camp.y, camp.intake }
-  UI.btnWay:SetEnabled(true); UI.btnShop:Hide(); UI.btnRoute:Show(); UI.btnWay:Show(); UI.btnList:Hide(); UI.btnPlan:Hide()
+  UI.btnWay:SetEnabled(true); UI.btnShop:Hide(); UI.btnRoute:Show(); UI.btnWay:Show(); UI.btnList:Hide(); UI.btnPlan:Hide(); UI.btnDropAll:Hide()
 end
 
 ---------------------------------------------------------------------------
@@ -1618,10 +1622,10 @@ SlashCmdList.INRIWRITMASTER = function(msg)
       end
       Print(fmt("  %s: %s", link or ("item " .. i), #parts > 0 and table.concat(parts, ", ") or "gold only"))
     end
-  elseif msg == "clear" then if WM.cdb then WM.cdb.plan = nil end; Print("Today's list cleared."); if UI.frame and UI.frame:IsShown() and UI.tab == 1 then WM:ShowTab(1) end
+  elseif msg == "clear" then if WM.cdb then WM.cdb.plan = nil end; Print("Today's list cleared."); if UI.list then UI.list.multi = false end; WM:Refresh()
   elseif msg == "mm" or msg == "minimap" then WM.db.settings.minimap = not WM.db.settings.minimap; if WM.UpdateMinimap then WM.UpdateMinimap() end
   elseif msg == "help" then
-    Print("/writ, /writ route, /writ list, /writ clear, /writ mm, /writ scan, /writ reset, /writ forget")
+    Print("/writ, /writ route, /writ list, /writ clear, /writ mm, /writ scan, /writ vendor, /writ reset, /writ forget")
   else
     local ok, err = xpcall(function() WM:Toggle() end, function(e) return tostring(e) .. "\n" .. (debugstack and debugstack(2, 6, 0) or "") end)
     if not ok then Print(col("red", "error opening window:") .. " " .. tostring(err)) end

@@ -2,8 +2,11 @@
 
 ## v1.0.5 (2026-11-14)
 
-- "Drop all" button on the Writs and Crates tabs clears today's list in one click.
+- "Drop all" button at the bottom of the Writs and Crates tabs clears today's list in one click.
 - Costs of 1g or more now show the silver too (1g 04s instead of 1g).
+- Vendors tab: items you can afford but don't have the reputation for yet now say "needs Honored" (or Revered/Exalted) instead of "affordable".
+- `/writ clear` now updates the open window on the Crates tab too.
+- `/writ vendor` is listed in `/writ help` and on the Info tab.
 
 ## v1.0.4 (2026-11-13)
 
