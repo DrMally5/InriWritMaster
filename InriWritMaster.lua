@@ -774,10 +774,12 @@ local function CreateList(parent, top, bottom)
       if not h then
         h = CreateFrame("Button", nil, self.header)
         h.text = h:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        h.text:SetAllPoints()
+        h.text:SetPoint("TOPLEFT"); h.text:SetPoint("BOTTOMLEFT")
         self.headCells[i] = h
       end
       h:SetSize(c.w, ROW_H); h:ClearAllPoints(); h:SetPoint("LEFT", x, 0)
+      -- right-aligned columns keep a gap before the next column
+      h.text:SetPoint("RIGHT", h, "RIGHT", c.j == "RIGHT" and -8 or 0, 0)
       h.text:SetJustifyH(c.j or "LEFT")
       if type(h.arrow) ~= "table" then
         h.arrow = h:CreateTexture(nil, "OVERLAY")
@@ -802,7 +804,7 @@ local function CreateList(parent, top, bottom)
         fs:ClearAllPoints()
         local pad = (i == 1 and c.icon) and 20 or 2
         fs:SetPoint("LEFT", cx + pad, 0)
-        fs:SetWidth(c.w - pad - 4)
+        fs:SetWidth(c.w - pad - (c.j == "RIGHT" and 8 or 4))
         fs:SetJustifyH(c.j or "LEFT")
         fs:Show()
         cx = cx + c.w
@@ -1197,7 +1199,7 @@ local function SelectWrit(e)
     end
   end
   UI.detail2:SetText(#nearby > 0 and ("Also in this zone from your bags: " .. table.concat(nearby, ", "))
-    or "~ sealed-writ estimate  c crafted  * partial price.  Rep/gold: green = best value, red = worst.")
+    or "~ sealed-writ estimate   c crafted   * partial price   Rep/gold: green = best")
   UI.wayTarget = map and { map, x, y, cname } or nil
   UI.btnPlan.text:SetText(WM.Plan()[w.q] and "Drop" or "Do today")
   UI.btnWay:SetEnabled(map ~= nil)
@@ -1305,9 +1307,9 @@ local function ShowWrits()
       UI.detail1:SetText(fmt("%s %d writs, %s rep for about %s%s", col("gold", "Today:"), pn, col("white", prep), Money(pcost),
         pdone > 0 and col("grey", fmt("  (%d turned in)", pdone)) or ""))
     else
-      UI.detail1:SetText(col("grey", fmt("%d writs listed. In your bags: %d (%d already turned in today, wait for reset). Shift-click writs to plan today.", #rows, own, done)))
+      UI.detail1:SetText(col("grey", fmt("%d writs. In bags: %d (%d turned in today). Shift-click to plan today.", #rows, own, done)))
     end
-    UI.detail2:SetText("~ sealed-writ estimate  c crafted  * partial price.  Rep/gold: green = best value, red = worst.")
+    UI.detail2:SetText("~ sealed-writ estimate   c crafted   * partial price   Rep/gold: green = best")
     UI.btnWay:SetEnabled(false)
   end
 end
