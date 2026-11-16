@@ -5,6 +5,7 @@
 - Profession filter on the Writs tab: Mine, All, Alch, Smith, Eng, LW, Tail. "Mine" is the default and shows only writs for the crafting professions your character knows (or all writs if you have none of the five).
 - Search box on the Writs, Crates and Vendors tabs. On Writs it matches item, customer, zone and profession. Esc clears it.
 - The Rep/gold column is coloured from red (worst value) to green (best value), compared against every writ you can do.
+- The price age warning no longer says "1d old" right after midnight for a scan you did late the evening before. Auctionator only records the day an item was seen, so it now says "prices from yesterday" and only turns orange at 2 days or more.
 - The sorted column is highlighted with an arrow showing the direction. A newly clicked column starts in its natural order: best rep per gold first, otherwise A-Z or cheapest first.
 
 ## v1.0.6 (2026-11-17)

@@ -1080,7 +1080,9 @@ local function UpdateHeader()
     -- freshness of writ prices: newest age among the three sealed writs
     local age
     for _, id in pairs(WM.SEALED) do local a = AHAge(id); if a and (not age or a < age) then age = a end end
-    if age and age >= 1 then ah = col("orange", fmt("prices %dd old   ", age)) end
+    -- Auctionator only records the calendar day an item was seen (local midnight), so 1 just means "yesterday"
+    if age and age >= 2 then ah = col("orange", fmt("prices %d days old   ", age))
+    elseif age == 1 then ah = col("grey", "prices from yesterday   ") end
   end
   local reset = WM.ResetText and WM.ResetText() or ""
   WM.UpdateAutoAH()
@@ -1169,7 +1171,7 @@ local function WritTooltip(row, e)
     GameTooltip:AddLine(col("grey", "  open your profession window once to price crafting"), 1, 1, 1, true)
   end
   local age = AHAge(w.i)
-  if age then GameTooltip:AddLine(col("grey", fmt("AH data for item is %d day(s) old", age))) end
+  if age then GameTooltip:AddLine(col("grey", age == 0 and "AH price seen today" or age == 1 and "AH price seen yesterday" or fmt("AH price is %d days old", age))) end
   local cname, map, x, y, learned = Customer(w)
   if map then
     GameTooltip:AddDoubleLine("Customer", fmt("%s, %s (%.1f, %.1f)%s", cname, ZoneName(map), x, y, learned and col("grey", " learned") or ""))
