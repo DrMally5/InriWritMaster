@@ -38,7 +38,7 @@ local DEFAULTS = {
   learned = {},        -- [questID] = {name, mapID, x, y}
   recipes = {},        -- [itemID] = {yield, {{reagentID, qty}, ...}}
   vendorCost = {},     -- [itemID] = favor cost seen at a vendor
-  settings = { tier = "ALL", ownedOnly = false, hideDone = false, craftOnly = false, sort = "eff", sortAsc = false, autoAH = true, autoCamp = true, minimap = true, minimapAngle = 200, tooltips = true, tipShift = true,
+  settings = { tier = "ALL", ownedOnly = false, hideDone = false, craftOnly = false, sort = "eff", sortAsc = false, autoAH = true, autoCamp = true, minimap = true, minimapAngle = 200, tooltips = true, tipShift = true, prof = "MINE",
                vendorProf = 1 },
   pos = nil,
 }
@@ -342,18 +342,66 @@ local function EvalWrit(w)
   return e
 end
 
+-- professions the character knows, as writ profession codes
+local PROF_CODE = { [171] = "AL", [164] = "BL", [202] = "EN", [165] = "LW", [197] = "TA" }
+local PROF_BY_NAME = { Alchemy = "AL", Blacksmithing = "BL", Engineering = "EN", Leatherworking = "LW", Tailoring = "TA" }
+WM.PROF_NAME = { AL = "Alchemy", BL = "Blacksmithing", EN = "Engineering", LW = "Leatherworking", TA = "Tailoring" }
+local function MyProfs()
+  local set, n = {}, 0
+  if GetProfessions and GetProfessionInfo then
+    local ok, a, b = pcall(GetProfessions)
+    if ok then
+      for _, idx in ipairs({ a or false, b or false }) do
+        if idx then
+          local ok2, name, _, _, _, _, _, skillLine = pcall(GetProfessionInfo, idx)
+          local code = ok2 and (PROF_CODE[skillLine] or PROF_BY_NAME[name])
+          if code and not set[code] then set[code] = true; n = n + 1 end
+        end
+      end
+    end
+  end
+  return set, n
+end
+WM.MyProfs = MyProfs
+
+-- search box text (lower case), shared by the list tabs
+local function Matches(...)
+  local q = WM.search
+  if not q or q == "" then return true end
+  for i = 1, select("#", ...) do
+    local v = select(i, ...)
+    if type(v) == "string" and strlower(v):find(q, 1, true) then return true end
+  end
+  return false
+end
+
 local function WritRows()
   local s = WM.db.settings
   local faction = PlayerFaction()
-  local rows = {}
+  local rows, effs = {}, {}
+  local mine, nMine = MyProfs()
+  local prof = s.prof or "ALL"
   for _, w in ipairs(WM.WRITS) do
     if not (w.ao and faction == "Horde") then
-      if s.tier == "ALL" or s.tier == w.t then
-        local e = EvalWrit(w)
+      local e = EvalWrit(w)
+      if e.complete and e.eff and e.eff ~= huge then effs[#effs + 1] = e.eff end
+      local profOK = prof == "ALL" or (prof == "MINE" and (nMine == 0 or mine[w.p])) or prof == w.p
+      if profOK and (s.tier == "ALL" or s.tier == w.t) then
         if (not s.ownedOnly or e.owned) and (not s.hideDone or not e.done) and (not s.planOnly or WM.Plan()[w.q]) then
-          rows[#rows + 1] = e
+          local cname, map = Customer(w)
+          if Matches(ItemName(w.i), cname, map and ZoneName(map), WM.PROF_NAME[w.p]) then rows[#rows + 1] = e end
         end
       end
+    end
+  end
+  -- rank each writ's rep per gold against every writ you could do (0 = worst, 1 = best)
+  table.sort(effs)
+  for _, e in ipairs(rows) do
+    if e.eff == huge then e.pct = 1
+    elseif e.complete and e.eff and #effs > 1 then
+      local below = 0
+      for _, v in ipairs(effs) do if v < e.eff then below = below + 1 else break end end
+      e.pct = below / (#effs - 1)
     end
   end
   local key, asc = s.sort, s.sortAsc
@@ -717,7 +765,7 @@ local function CreateList(parent, top, bottom)
     L:Render()
   end)
 
-  function L:SetColumns(cols, onSort)
+  function L:SetColumns(cols, onSort, sortKey, sortAsc)
     self.cols = cols
     for _, c in ipairs(self.headCells) do c:Hide() end
     local x = 0
@@ -731,7 +779,17 @@ local function CreateList(parent, top, bottom)
       end
       h:SetSize(c.w, ROW_H); h:ClearAllPoints(); h:SetPoint("LEFT", x, 0)
       h.text:SetJustifyH(c.j or "LEFT")
-      h.text:SetText(c.title)
+      if type(h.arrow) ~= "table" then
+        h.arrow = h:CreateTexture(nil, "OVERLAY")
+        h.arrow:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
+        h.arrow:SetSize(10, 10)
+      end
+      local active = c.sort and sortKey and c.sort == sortKey
+      h.text:SetText(active and col("gold", c.title) or c.title)
+      h.arrow:ClearAllPoints()
+      if c.j == "RIGHT" then h.arrow:SetPoint("RIGHT", h.text, "RIGHT", -((h.text:GetStringWidth() or 0) + 2), 0)
+      else h.arrow:SetPoint("LEFT", h.text, "LEFT", (h.text:GetStringWidth() or 0) + 2, 0) end
+      if active then h.arrow:SetRotation(sortAsc and (math.pi / 2) or (-math.pi / 2)); h.arrow:Show() else h.arrow:Hide() end
       h:SetScript("OnClick", c.sort and onSort and function() onSort(c.sort) end or nil)
       h:Show()
       x = x + c.w
@@ -804,7 +862,7 @@ local function RowTipOwner(row)
     GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
   end
 end
-local W, H = 860, 486
+local W, H = 860, 512
 
 local function SavePos(f)
   local p, _, rp, x, y = f:GetPoint()
@@ -871,7 +929,36 @@ local function BuildFrame()
 
   Line(f, -63)
 
-  UI.list = CreateList(f, -68, 58)
+  -- second filter row: profession buttons (Writs) on the left, search box on the right
+  UI.filters2 = CreateFrame("Frame", nil, f)
+  UI.filters2:SetPoint("TOPLEFT", 10, -67); UI.filters2:SetPoint("TOPRIGHT", -200, -67); UI.filters2:SetHeight(20)
+  local sb = CreateFrame("EditBox", nil, f, "BackdropTemplate")
+  sb:SetSize(180, 20); sb:SetPoint("TOPRIGHT", -12, -67)
+  Skin(sb, { 0.05, 0.05, 0.05, 1 }, { 0.40, 0.33, 0.18, 1 }, true)
+  sb:SetAutoFocus(false); sb:SetFontObject(GameFontHighlightSmall); sb:SetTextInsets(6, 20, 0, 0); sb:SetMaxLetters(40)
+  sb.hint = sb:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+  sb.hint:SetPoint("LEFT", 6, 0); sb.hint:SetText("Search")
+  sb.clear = CreateFrame("Button", nil, sb)
+  sb.clear:SetSize(14, 14); sb.clear:SetPoint("RIGHT", -3, 0)
+  sb.clear.text = sb.clear:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+  sb.clear.text:SetPoint("CENTER"); sb.clear.text:SetText("x")
+  sb.clear:SetScript("OnClick", function() sb:SetText(""); sb:ClearFocus() end)
+  sb.clear:Hide()
+  sb:SetScript("OnTextChanged", function(self)
+    local t = strtrim(self:GetText() or "")
+    self.hint:SetShown(t == "" and not self:HasFocus()); self.clear:SetShown(t ~= "")
+    local q = t ~= "" and strlower(t) or nil
+    if q ~= WM.search then WM.search = q; UI.list.offset = 0; WM:Refresh() end
+  end)
+  sb:SetScript("OnEditFocusGained", function(self) self.hint:Hide() end)
+  sb:SetScript("OnEditFocusLost", function(self) self.hint:SetShown(strtrim(self:GetText() or "") == "") end)
+  sb:SetScript("OnEscapePressed", function(self) self:SetText(""); self:ClearFocus() end)
+  sb:SetScript("OnEnterPressed", function(self) self:ClearFocus() end)
+  UI.searchBox = sb
+
+  Line(f, -91)
+
+  UI.list = CreateList(f, -96, 58)
   UI.list:SetPoint("BOTTOMRIGHT", -8, 58)
 
   Line(f, -(H - 54))
@@ -932,7 +1019,24 @@ end
 
 -- filter widgets (rebuilt per tab)
 local filterWidgets = {}
-local function ClearFilters() for _, w in ipairs(filterWidgets) do w:Hide() end wipe(filterWidgets) end
+local filterWidgets2 = {}
+local function ClearFilters()
+  for _, w in ipairs(filterWidgets) do w:Hide() end wipe(filterWidgets)
+  for _, w in ipairs(filterWidgets2) do w:Hide() end wipe(filterWidgets2)
+end
+local function AddFilter2(text, w, onClick, active, tip)
+  local b = Button(UI.filters2, text, w, 20, onClick)
+  local x = 0
+  for _, o in ipairs(filterWidgets2) do x = x + o:GetWidth() + 4 end
+  b:SetPoint("LEFT", x, 0)
+  b:SetActive(active)
+  if tip then
+    b:HookScript("OnEnter", function(s) GameTooltip:SetOwner(s, "ANCHOR_BOTTOM"); GameTooltip:SetText(tip, 1, 1, 1, 1, true); GameTooltip:Show() end)
+    b:HookScript("OnLeave", function() GameTooltip:Hide() end)
+  end
+  filterWidgets2[#filterWidgets2 + 1] = b
+  return b
+end
 local function AddFilter(text, w, onClick, active, tip)
   local b = Button(UI.filters, text, w, 20, onClick)
   local x = 0
@@ -1015,7 +1119,14 @@ local function WritCells(e)
   local eff
   if e.eff == huge then eff = col("green", "free")
   elseif e.eff then
-    local c = e.complete and (e.eff >= 100 and "green" or e.eff >= 30 and "white" or "orange") or "grey"
+    local c = "grey"
+    if e.complete and e.pct then
+      -- red (poor) > yellow > green (best value), relative to every writ you can do
+      local t = e.pct
+      local r, g, b
+      if t < 0.5 then r, g, b = 0.90, 0.35 + t * 1.0, 0.30 else r, g, b = 0.90 - (t - 0.5) * 1.1, 0.85, 0.30 + (t - 0.5) * 0.1 end
+      c = fmt("ff%02x%02x%02x", floor(r * 255), floor(g * 255), floor(b * 255))
+    elseif e.complete then c = "white" end
     eff = col(c, fmt(e.eff >= 100 and "%.0f" or "%.1f", e.eff))
   else eff = col("grey", "—") end
   return {
@@ -1086,7 +1197,7 @@ local function SelectWrit(e)
     end
   end
   UI.detail2:SetText(#nearby > 0 and ("Also in this zone from your bags: " .. table.concat(nearby, ", "))
-    or "+ owned  ~ sealed-writ estimate  c crafted  * partial price.  Sorted by cheapest gold per rep.")
+    or "~ sealed-writ estimate  c crafted  * partial price.  Rep/gold: green = best value, red = worst.")
   UI.wayTarget = map and { map, x, y, cname } or nil
   UI.btnPlan.text:SetText(WM.Plan()[w.q] and "Drop" or "Do today")
   UI.btnWay:SetEnabled(map ~= nil)
@@ -1138,11 +1249,20 @@ local function ShowWrits()
     "Only the writs you picked for today (Shift-click a row or use the Do today button).")
   AddFilter("Craft", 46, function() s.craftOnly = not s.craftOnly; ShowWrits() end, s.craftOnly,
     "Prefer crafting cost over AH price for recipes you know.")
+  local _, nMine = MyProfs()
+  for _, t in ipairs({ { "MINE", "Mine", 46 }, { "ALL", "All", 36 }, { "AL", "Alch", 40 }, { "BL", "Smith", 44 },
+                       { "EN", "Eng", 36 }, { "LW", "LW", 32 }, { "TA", "Tail", 36 } }) do
+    local tip = t[1] == "MINE" and (nMine > 0 and "Only writs for the crafting professions this character knows."
+      or "Only writs for your crafting professions. This character has none of the five writ professions, so all writs are shown.")
+      or (t[1] == "ALL" and "Writs for every profession.") or ("Only " .. WM.PROF_NAME[t[1]] .. " writs.")
+    AddFilter2(t[2], t[3], function() s.prof = t[1]; UI.list.offset = 0; ShowWrits() end, (s.prof or "ALL") == t[1], tip)
+  end
 
   UI.list:SetColumns(WRIT_COLS, function(key)
-    if s.sort == key then s.sortAsc = not s.sortAsc else s.sort, s.sortAsc = key, false end
+    -- a new column starts in its natural order: best rep per gold first, everything else A-Z / cheapest first
+    if s.sort == key then s.sortAsc = not s.sortAsc else s.sort, s.sortAsc = key, key ~= "eff" end
     ShowWrits()
-  end)
+  end, s.sort, s.sortAsc)
   UI.list.cellFn = WritCells
   UI.tooltipFn = WritTooltip
   UI.clickFn = function(e, btn)
@@ -1187,7 +1307,7 @@ local function ShowWrits()
     else
       UI.detail1:SetText(col("grey", fmt("%d writs listed. In your bags: %d (%d already turned in today, wait for reset). Shift-click writs to plan today.", #rows, own, done)))
     end
-    UI.detail2:SetText("+ owned  ~ sealed-writ estimate  c crafted  * partial price.  Sorted by cheapest gold per rep.")
+    UI.detail2:SetText("~ sealed-writ estimate  c crafted  * partial price.  Rep/gold: green = best value, red = worst.")
     UI.btnWay:SetEnabled(false)
   end
 end
@@ -1304,7 +1424,11 @@ function ShowCrates()
     UI.list:Render()
   end
   local rows = {}
-  for _, c in ipairs(WM.CRATES) do rows[#rows + 1] = EvalCrate(c) end
+  for _, c in ipairs(WM.CRATES) do
+    local names = { c.name }
+    for _, o in ipairs(c.opts) do names[#names + 1] = ItemName(o[1]) end
+    if Matches(unpack(names)) then rows[#rows + 1] = EvalCrate(c) end
+  end
   table.sort(rows, function(a, b)
     if (a.eff ~= nil) ~= (b.eff ~= nil) then return a.eff ~= nil end
     if a.eff and b.eff and a.eff ~= b.eff then return a.eff > b.eff end
@@ -1390,7 +1514,7 @@ local function ShowVendors()
   UI.clickFn = function(it) UI.list.selected = it.key; UI.list:Render() end
   local rows = {}
   for _, it in ipairs(v.items) do
-    if not (it[5] and ((it[5] == "A") ~= (faction == "Alliance"))) then
+    if not (it[5] and ((it[5] == "A") ~= (faction == "Alliance"))) and Matches(ItemName(it[1])) then
       it.key = it[1]
       rows[#rows + 1] = it
     end
@@ -1487,6 +1611,11 @@ function WM:ShowTab(i)
   UI.tab = i
   UI.list.offset, UI.list.selected, UI.selected, UI.list.multi = 0, nil, nil, false
   for j, b in ipairs(UI.tabs) do b:SetActive(j == i) end
+  if UI.searchBox then
+    WM.search = nil; UI.searchBox:SetText(""); UI.searchBox:ClearFocus()
+    UI.searchBox:SetShown(i ~= 4)
+    UI.searchBox.hint:SetText(({ "Search item, customer, zone", "Search crate or material", "Search item" })[i] or "Search")
+  end
   TAB_FN[i]()
   UpdateHeader()
 end

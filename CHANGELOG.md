@@ -1,5 +1,12 @@
 # Inri's WritMaster
 
+## v1.0.7 (2026-11-17)
+
+- Profession filter on the Writs tab: Mine, All, Alch, Smith, Eng, LW, Tail. "Mine" is the default and shows only writs for the crafting professions your character knows (or all writs if you have none of the five).
+- Search box on the Writs, Crates and Vendors tabs. On Writs it matches item, customer, zone and profession. Esc clears it.
+- The Rep/gold column is coloured from red (worst value) to green (best value), compared against every writ you can do.
+- The sorted column is highlighted with an arrow showing the direction. A newly clicked column starts in its natural order: best rep per gold first, otherwise A-Z or cheapest first.
+
 ## v1.0.6 (2026-11-17)
 
 - 38 more Expert writ customers with name, zone and coordinates, so 45 of the 60 Expert writs now show where to deliver. Includes the new Riverglades zone. This matters because the game doesn't show writ customers on the map.
