@@ -18,7 +18,7 @@ Type `/writ` to open it, or click the minimap button.
 **Customers and routes**
 - Customer name and coordinates for every known writ, with a waypoint on right-click (TomTom if installed, otherwise the built-in map pin).
 - `/writ route` lists a delivery route for the writs in your bags, grouped by zone.
-- Expert and Artisan customers are not published yet. WritMaster learns them from quest map markers and turn-ins and remembers them on your account.
+- All Journeyman and 45 of 60 Expert customers are built in. Artisan customers are not published yet, and the game doesn't mark writ customers on the map. WritMaster remembers each new customer on your account the first time you turn that writ in.
 
 **Plan your day**
 - Shift-click a writ, or Ctrl-click several and press **Do today**. Planned writs are tinted gold.
@@ -56,7 +56,7 @@ Type `/writ` to open it, or click the minimap button.
 
 ## Data and accuracy
 
-Writ quests, items and Journeyman customer locations come from game data and community sources. Expert and Artisan customers, Artisan crate payouts and a few vendor prices are not confirmed yet. The addon learns customers as you play, and the static data will be updated as more becomes known. Corrections are welcome in [Issues](../../issues).
+Writ quests, items and customer locations come from game data and community sources (Questie's database). The remaining Expert customers, all Artisan customers, Artisan crate payouts and a few vendor prices are not confirmed yet. The addon learns customers as you play, and the static data will be updated as more becomes known. Corrections are welcome in [Issues](../../issues).
 
 ## Credits
 

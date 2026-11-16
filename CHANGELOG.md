@@ -1,5 +1,11 @@
 # Inri's WritMaster
 
+## v1.0.6 (2026-11-17)
+
+- 38 more Expert writ customers with name, zone and coordinates, so 45 of the 60 Expert writs now show where to deliver. Includes the new Riverglades zone. This matters because the game doesn't show writ customers on the map.
+- Four Expert customers that were marked "unconfirmed" or "see quest marker" are now confirmed.
+- New zones in the delivery route: Swamp of Sorrows, The Hinterlands, Searing Gorge, Desolace, Tanaris, Un'Goro Crater and Riverglades.
+
 ## v1.0.5 (2026-11-14)
 
 - "Drop all" button at the bottom of the Writs and Crates tabs clears today's list in one click.

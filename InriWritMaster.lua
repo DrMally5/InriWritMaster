@@ -1011,7 +1011,7 @@ local function WritCells(e)
   local zone
   local cname, map = Customer(w)
   zone = map and (ZoneName(map) .. col("grey", " · " .. cname)) or (w.zh and (ZoneName(w.zh) .. col("grey", " · see marker")))
-    or col("grey", e.owned and "open writ to map" or "unknown")
+    or col("grey", e.owned and "learned on turn-in" or "unknown")
   local eff
   if e.eff == huge then eff = col("green", "free")
   elseif e.eff then
