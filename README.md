@@ -14,6 +14,7 @@ Type `/writ` to open it, or click the minimap button.
 - All 150 Craftsman's Writs (Journeyman 75 rep, Expert 125, Artisan 200), sorted by rep per gold.
 - Cost = the writ (named writ, or a sealed writ as an estimate) + the requested item, bought on the AH or crafted from materials, whichever is cheaper. Open your profession window once so it can price crafting.
 - Writs you already turned in today are dimmed, and the daily reset timer is in the header.
+- Filter by profession ("Mine" shows only your crafting professions) and search by item, customer or zone. Rep per gold is coloured from red (poor) to green (best value).
 
 **Customers and routes**
 - Customer name and coordinates for every known writ, with a waypoint on right-click (TomTom if installed, otherwise the built-in map pin).
