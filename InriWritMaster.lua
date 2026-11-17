@@ -18,7 +18,7 @@ local C = {
   panel   = { 0.08, 0.075, 0.07, 0.95 },
   border  = { 0.55, 0.45, 0.25, 1 },
   line    = { 0.55, 0.45, 0.25, 0.35 },
-  rowAlt  = { 1, 1, 1, 0.025 },
+  rowAlt  = { 1, 1, 1, 0.045 },
   hover   = { 0.83, 0.69, 0.22, 0.10 },
   sel     = { 0.83, 0.69, 0.22, 0.20 },
 }
@@ -704,6 +704,9 @@ local function CreateList(parent, top, bottom)
   L.offset, L.data, L.cols, L.multi = 0, {}, {}, false
   L.header = CreateFrame("Frame", nil, L)
   L.header:SetPoint("TOPLEFT"); L.header:SetPoint("TOPRIGHT", -10, 0); L.header:SetHeight(ROW_H)
+  local hb = L.header:CreateTexture(nil, "BACKGROUND"); hb:SetAllPoints(); hb:SetColorTexture(0.83, 0.69, 0.22, 0.07)
+  local hl = L.header:CreateTexture(nil, "BORDER"); hl:SetPoint("BOTTOMLEFT"); hl:SetPoint("BOTTOMRIGHT"); hl:SetHeight(1)
+  hl:SetColorTexture(0.55, 0.45, 0.25, 0.5)
   L.headCells = {}
   L.rows = {}
   for i = 1, VISIBLE do
@@ -806,6 +809,7 @@ local function CreateList(parent, top, bottom)
         fs:SetPoint("LEFT", cx + pad, 0)
         fs:SetWidth(c.w - pad - (c.j == "RIGHT" and 8 or 4))
         fs:SetJustifyH(c.j or "LEFT")
+        fs:SetAlpha(c.dim and 0.65 or 1)
         fs:Show()
         cx = cx + c.w
       end
@@ -889,6 +893,11 @@ local function BuildFrame()
   f:Hide()
   UI.frame = f
 
+  -- title and footer bands
+  local tb = f:CreateTexture(nil, "BACKGROUND", nil, 1)
+  tb:SetPoint("TOPLEFT", 3, -3); tb:SetPoint("TOPRIGHT", -3, -3); tb:SetHeight(29); tb:SetColorTexture(0.83, 0.69, 0.22, 0.06)
+  local fb = f:CreateTexture(nil, "BACKGROUND", nil, 1)
+  fb:SetPoint("BOTTOMLEFT", 3, 3); fb:SetPoint("BOTTOMRIGHT", -3, 3); fb:SetHeight(50); fb:SetColorTexture(0, 0, 0, 0.35)
   local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
   title:SetPoint("TOPLEFT", 12, -10)
   title:SetText(col("gold", "Inri's") .. " " .. col("white", "WritMaster"))
@@ -965,16 +974,17 @@ local function BuildFrame()
 
   Line(f, -(H - 54))
   UI.detail1 = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  UI.detail1:SetPoint("BOTTOMLEFT", 12, 34); UI.detail1:SetPoint("RIGHT", -454, 0); UI.detail1:SetJustifyH("LEFT")
+  UI.detail1:SetPoint("BOTTOMLEFT", 12, 34); UI.detail1:SetPoint("RIGHT", -466, 0); UI.detail1:SetJustifyH("LEFT")
   UI.detail2 = f:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  UI.detail2:SetPoint("BOTTOMLEFT", 12, 14); UI.detail2:SetPoint("RIGHT", -454, 0); UI.detail2:SetJustifyH("LEFT")
+  UI.detail2:SetPoint("BOTTOMLEFT", 12, 14); UI.detail2:SetPoint("RIGHT", -466, 0); UI.detail2:SetJustifyH("LEFT")
 
   UI.btnWay = Button(f, "Waypoint", 70, 20, function() if UI.wayTarget then WM:Waypoint(unpack(UI.wayTarget)) end end)
   UI.btnWay:SetPoint("BOTTOMRIGHT", -156, 12)
   UI.btnShop = Button(f, "Search AH", 70, 20, function() WM:ShopSelected() end)
   UI.btnShop:SetPoint("BOTTOMRIGHT", -82, 12)
   UI.btnList = Button(f, "Shop list", 70, 20, function() WM:ShoppingList() end)
-  UI.btnList:SetPoint("BOTTOMRIGHT", -230, 12)
+  UI.btnList:SetPoint("BOTTOMRIGHT", -240, 12)
+  UI.btnList:SetActive(true)   -- primary action: always gold
   UI.btnPlan = Button(f, "Do today", 70, 20, function()
     local m = UI.list.multi
     if m and next(m) then
@@ -989,13 +999,13 @@ local function BuildFrame()
     if plan[e.key] then plan[e.key] = nil else plan[e.key] = true end
     WM:Refresh()
   end)
-  UI.btnPlan:SetPoint("BOTTOMRIGHT", -304, 12)
+  UI.btnPlan:SetPoint("BOTTOMRIGHT", -314, 12)
   UI.btnDropAll = Button(f, "Drop all", 70, 20, function()
     local plan = PlanFor(UI.tab); for k in pairs(plan) do plan[k] = nil end
     UI.list.multi = false
     WM:Refresh()
   end)
-  UI.btnDropAll:SetPoint("BOTTOMRIGHT", -378, 12)
+  UI.btnDropAll:SetPoint("BOTTOMRIGHT", -388, 12)
   UI.btnDropAll:HookScript("OnEnter", function(s) GameTooltip:SetOwner(s, "ANCHOR_TOP"); GameTooltip:SetText("Drop all", 1, 0.82, 0)
     GameTooltip:AddLine(UI.tab == 2 and "Removes every crate from today's list." or "Removes every writ from today's list.", 1, 1, 1, true); GameTooltip:Show() end)
   UI.btnDropAll:HookScript("OnLeave", function() GameTooltip:Hide() end)
@@ -1098,8 +1108,8 @@ local WRIT_COLS = {
   { title = "Qty", w = 32, j = "CENTER" },
   { title = "Tier", w = 50, sort = "tier" },
   { title = "Rep", w = 36, j = "RIGHT" },
-  { title = "Writ", w = 76, j = "RIGHT" },
-  { title = "Item", w = 82, j = "RIGHT" },
+  { title = "Writ", w = 76, j = "RIGHT", dim = true },
+  { title = "Item", w = 82, j = "RIGHT", dim = true },
   { title = "Total", w = 82, j = "RIGHT", sort = "total" },
   { title = "Rep/gold", w = 70, j = "RIGHT", sort = "eff" },
   { title = "Customer zone", w = 168, sort = "zone" },
@@ -1136,7 +1146,7 @@ local function WritCells(e)
   return {
     (WM.Plan()[w.q] and col("gold", "> ") or "") .. col(nameCol, name) .. (e.done and col("grey", " (done)") or ""),
     col("grey", w.p),
-    (w.n or 1) > 1 and col("white", w.n) or col("grey", "1"),
+    (w.n or 1) > 1 and col("white", w.n) or "",
     col(TIER_COL[w.t], ShortTier(w.t)),
     col("white", w.r),
     Money(e.writCost, true) .. SrcTag(e.writSrc),
@@ -1254,7 +1264,7 @@ local function ShowWrits()
   AddFilter("Craft", 46, function() s.craftOnly = not s.craftOnly; ShowWrits() end, s.craftOnly,
     "Prefer crafting cost over AH price for recipes you know.")
   local _, nMine = MyProfs()
-  for _, t in ipairs({ { "MINE", "Mine", 46 }, { "ALL", "All", 36 }, { "AL", "Alch", 40 }, { "BL", "Smith", 44 },
+  for _, t in ipairs({ { "ALL", "All", 36 }, { "MINE", "Mine", 46 }, { "AL", "Alch", 40 }, { "BL", "Smith", 44 },
                        { "EN", "Eng", 36 }, { "LW", "LW", 32 }, { "TA", "Tail", 36 } }) do
     local tip = t[1] == "MINE" and (nMine > 0 and "Only writs for the crafting professions this character knows."
       or "Only writs for your crafting professions. This character has none of the five writ professions, so all writs are shown.")
