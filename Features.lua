@@ -111,7 +111,7 @@ local function AddWritLines(tt, id)
       tt:AddDoubleLine("Expected rep per gold", col("white", fmt("%.1f", eff)))
       tt:AddDoubleLine("Buy this writ?", Verdict(eff) or col("grey", "not enough price data"))
     else
-      tt:AddLine(col("grey", "Scan the AH with Auctionator to get a buy-or-skip verdict."))
+      tt:AddLine(col("grey", "Scan the AH with Auctionator or TSM to get a buy-or-skip verdict."))
     end
   elseif asItem then
     tt:AddDoubleLine(col("gold", "WritMaster"), fmt("needed for a %s writ (%d rep)", WM.TIER_NAME[asItem.t], asItem.r))

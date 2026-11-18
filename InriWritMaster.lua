@@ -38,7 +38,7 @@ local DEFAULTS = {
   learned = {},        -- [questID] = {name, mapID, x, y}
   recipes = {},        -- [itemID] = {yield, {{reagentID, qty}, ...}}
   vendorCost = {},     -- [itemID] = favor cost seen at a vendor
-  settings = { tier = "ALL", ownedOnly = false, hideDone = false, craftOnly = false, sort = "eff", sortAsc = false, autoAH = true, autoCamp = true, minimap = true, minimapAngle = 200, tooltips = true, tipShift = true, prof = "MINE", scale = 1, loginSummary = true, perDay = 10,
+  settings = { tier = "ALL", ownedOnly = false, hideDone = false, craftOnly = false, sort = "eff", sortAsc = false, autoAH = true, autoCamp = true, minimap = true, minimapAngle = 200, tooltips = true, tipShift = true, prof = "MINE", scale = 1, loginSummary = true, perDay = 10, preferTSM = false,
                vendorProf = 1 },
   pos = nil,
 }
@@ -126,16 +126,37 @@ end
 WM.HasAuctionator = HasAuctionator
 
 local priceCache, priceCacheTime = {}, 0
+-- TradeSkillMaster as a second price source
+local function HasTSM()
+  return type(TSM_API) == "table" and type(TSM_API.GetCustomPriceValue) == "function"
+end
+WM.HasTSM = HasTSM
+local TSM_SOURCES = { "DBMinBuyout", "DBRecent", "DBMarket" }
+local function TSMPrice(id)
+  if not HasTSM() then return nil end
+  for _, src in ipairs(TSM_SOURCES) do
+    local ok, v = pcall(TSM_API.GetCustomPriceValue, src, "i:" .. id)
+    if ok and type(v) == "number" and v > 0 then return v end
+  end
+end
+local function AuctionatorPrice(id)
+  if not HasAuctionator() then return nil end
+  local ok, p = pcall(Auctionator.API.v1.GetAuctionPriceByItemID, CALLER, id)
+  if ok and type(p) == "number" and p > 0 then return p end
+end
+
+-- AH price: Auctionator first and TSM as a fallback (or the other way round if "Prefer TSM" is on)
 local function AHPrice(id)
-  if not id or not HasAuctionator() then return nil end
+  if not id then return nil end
   local now = GetTime()
   if now - priceCacheTime > 30 then wipe(priceCache); priceCacheTime = now end
   local v = priceCache[id]
   if v ~= nil then return v or nil end
-  local ok, p = pcall(Auctionator.API.v1.GetAuctionPriceByItemID, CALLER, id)
-  if not ok or type(p) ~= "number" or p <= 0 then p = false end
-  priceCache[id] = p
-  return p or nil
+  local p
+  if WM.db and WM.db.settings.preferTSM then p = TSMPrice(id) or AuctionatorPrice(id)
+  else p = AuctionatorPrice(id) or TSMPrice(id) end
+  priceCache[id] = p or false
+  return p
 end
 WM.AHPrice = AHPrice
 
@@ -1087,7 +1108,7 @@ local function UpdateHeader()
     UI.status:SetText(col("grey", camp.name .. " — not discovered yet"))
   end
   local fav, icon = GetFavor()
-  local ah = HasAuctionator() and "" or col("red", "Auctionator not loaded   ")
+  local ah = (HasAuctionator() or HasTSM()) and "" or col("red", "Auctionator or TSM needed for prices   ")
   if ah == "" then
     -- freshness of writ prices: newest age among the three sealed writs
     local age
@@ -1580,6 +1601,9 @@ local function ShowInfo()
   for _, v in ipairs({ 5, 10, 20 }) do
     AddFilter2(tostring(v), 30, function() st.perDay = v; ShowInfo() end, (st.perDay or 10) == v)
   end
+  AddFilter2("Prefer TSM", 80, function() st.preferTSM = not st.preferTSM; wipe(priceCache); ShowInfo() end, st.preferTSM,
+    HasTSM() and "Use TradeSkillMaster prices first and Auctionator only where TSM has none. Off: Auctionator first, TSM as backup."
+    or "TradeSkillMaster isn't loaded. When it is, WritMaster uses its prices wherever Auctionator has none.")
   AddFilter2("Login summary", 100, function() st.loginSummary = not st.loginSummary; ShowInfo() end, st.loginSummary,
     "When you log in, print how many writs in your bags are ready to deliver.")
   UI.list:SetColumns(INFO_COLS)

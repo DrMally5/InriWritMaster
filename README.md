@@ -55,6 +55,7 @@ Type `/writ` to open it, or click the minimap button.
 
 - WoW: Forever (Interface 16001)
 - [Auctionator](https://www.curseforge.com/wow/addons/auctionator) for prices and shopping lists (strongly recommended)
+- TradeSkillMaster (optional) as a second price source
 - TomTom (optional) for arrow waypoints
 
 ## Data and accuracy
