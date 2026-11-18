@@ -1868,13 +1868,21 @@ SlashCmdList.INRIWRITMASTER = function(msg)
       Print(fmt("  %s: %s", link or ("item " .. i), #parts > 0 and table.concat(parts, ", ") or "gold only"))
     end
   elseif msg == "clear" then if WM.cdb then WM.cdb.plan = nil end; Print("Today's list cleared."); if UI.list then UI.list.multi = false end; WM:Refresh()
+  elseif msg == "prices" then
+    -- price source check: Auctionator vs TSM for the three sealed writs
+    Print(fmt("Auctionator %s, TSM %s. Using %s first.", HasAuctionator() and col("green", "loaded") or col("red", "not loaded"),
+      HasTSM() and col("green", "loaded") or col("red", "not loaded"), WM.db.settings.preferTSM and "TSM" or "Auctionator"))
+    for _, t in ipairs({ "J", "E", "A" }) do
+      local id = WM.SEALED[t]
+      Print(fmt("  %s: Auctionator %s   TSM %s", ItemName(id) or id, Money(AuctionatorPrice(id)), Money(TSMPrice(id))))
+    end
   elseif msg:match("^scale") then
     local n = tonumber(msg:match("(%d+)"))
     if not n then Print("Usage: /writ scale 80 to 150 (percent). Now " .. floor((WM.db.settings.scale or 1) * 100 + 0.5) .. "%.")
     else WM.SetScale(n / 100); Print(fmt("Window size %d%%.", floor(WM.db.settings.scale * 100 + 0.5))) end
   elseif msg == "mm" or msg == "minimap" then WM.db.settings.minimap = not WM.db.settings.minimap; if WM.UpdateMinimap then WM.UpdateMinimap() end
   elseif msg == "help" then
-    Print("/writ, /writ route, /writ list, /writ clear, /writ mm, /writ scale, /writ scan, /writ vendor, /writ reset, /writ forget")
+    Print("/writ, /writ route, /writ list, /writ clear, /writ mm, /writ scale, /writ prices, /writ scan, /writ vendor, /writ reset, /writ forget")
   else
     local ok, err = xpcall(function() WM:Toggle() end, function(e) return tostring(e) .. "\n" .. (debugstack and debugstack(2, 6, 0) or "") end)
     if not ok then Print(col("red", "error opening window:") .. " " .. tostring(err)) end

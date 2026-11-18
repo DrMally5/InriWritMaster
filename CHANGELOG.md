@@ -6,6 +6,7 @@
 - Writ customers in Riverglades can now be learned from quest map markers too.
 - Goal planner on the Info tab: how many days and how much gold to your next standing and to Exalted, if you do the 5, 10 or 20 best-value writs each day at current prices.
 - TradeSkillMaster support: TSM prices fill in wherever Auctionator has none, or turn on "Prefer TSM" on the Info tab to use TSM first. Shopping lists still use Auctionator.
+- New `/writ prices` command shows whether Auctionator and TSM are loaded and what each one prices the sealed writs at.
 - Window size setting: 90%, 100%, 110% or 125% on the Info tab, or any size from 80 to 150 with `/writ scale`.
 - Less chat spam: the "loaded" message only shows the first time, and the automatic shopping list refresh at the Auction House is silent. The login summary of writs ready to deliver can be turned off on the Info tab.
 - Cleaned up leftover settings from older versions.
