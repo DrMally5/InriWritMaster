@@ -547,6 +547,7 @@ end
 -- Read customer positions from quest map markers for writs that are in the quest log.
 local ZONE_MAPS = {}
 for m = 1411, 1458 do ZONE_MAPS[#ZONE_MAPS + 1] = m end
+ZONE_MAPS[#ZONE_MAPS + 1] = 2548   -- Riverglades
 local function LearnFromQuestLog()
   if not (C_QuestLog and C_QuestLog.GetQuestsOnMap and C_QuestLog.GetLogIndexForQuestID) then return 0 end
   local want, any = {}, false
@@ -1717,8 +1718,13 @@ ev:SetScript("OnEvent", function(_, event, arg1)
     if WM.byQuest[arg1] then WM:QueueRefresh() end
   elseif event == "TRADE_SKILL_SHOW" or event == "TRADE_SKILL_LIST_UPDATE" then
     C_Timer.After(0.5, function()
+      local before = 0
+      for _ in pairs(WM.cdb.known) do before = before + 1 end
       local n = ScanTradeSkill()
-      if n and n > 0 and event == "TRADE_SKILL_SHOW" then Print(fmt("Priced %d writ recipes you know.", n)) end
+      local after = 0
+      for _ in pairs(WM.cdb.known) do after = after + 1 end
+      -- only mention it when something new was learned, not on every profession window open
+      if n and n > 0 and after > before then Print(fmt("Priced %d writ recipes you know.", n)) end
       WM:QueueRefresh()
     end)
   elseif event == "MERCHANT_SHOW" then

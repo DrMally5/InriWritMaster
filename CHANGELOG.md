@@ -1,5 +1,10 @@
 # Inri's WritMaster
 
+## v1.0.8 (2026-11-18)
+
+- Opening a profession window no longer prints "Priced N writ recipes you know" every time. It only appears when WritMaster finds a recipe it didn't know about yet.
+- Writ customers in Riverglades can now be learned from quest map markers too.
+
 ## v1.0.7 (2026-11-17)
 
 - Profession filter on the Writs tab: All, Mine, Alch, Smith, Eng, LW, Tail. "Mine" is the default and shows only writs for the crafting professions your character knows (or all writs if you have none of the five).
