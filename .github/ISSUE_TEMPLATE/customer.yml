@@ -1,0 +1,24 @@
+name: Writ customer location
+description: Tell us where a writ customer is (or that one is wrong)
+labels: [data]
+body:
+  - type: input
+    id: writ
+    attributes:
+      label: Writ
+      description: Requested item, e.g. "Pearl-handled Dagger"
+    validations:
+      required: true
+  - type: input
+    id: npc
+    attributes:
+      label: Customer name
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Zone and coordinates
+      description: e.g. Duskwood 73.5, 44.2
+    validations:
+      required: true

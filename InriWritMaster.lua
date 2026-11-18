@@ -1713,7 +1713,7 @@ local function ShowInfo()
   if not ver or ver:find("@") then ver = "dev" end
   add(col("gold", "About") .. col("grey", "   Inri's WritMaster " .. ver .. "  ·  Author: Inri"))
   add("  |cff04cca4Development is done by a hardworking AI (& 1 lazy human)|r")
-  add(col("grey", "  github.com/DrMally5/InriWritMaster  ·  report bugs and new customer locations in Issues"))
+  add("  " .. col("white", "Ideas, bugs or a missing customer?") .. col("grey", "  github.com/DrMally5/InriWritMaster/issues  ·  requests get built"))
   UI.list:SetData(lines)
   UI.detail1:SetText(fmt("Camp: %s", col("white", camp.where)))
   UI.detail2:SetText("Data decoded from your Questie database and Forever guides. Unconfirmed values are marked and learned in game.")

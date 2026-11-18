@@ -1,0 +1,31 @@
+name: Bug report
+description: Something broke or shows the wrong thing
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, and what did you expect instead? Screenshots help a lot.
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Lua error (if any)
+      description: Paste the full error from BugSack or the default error window.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Addon version
+      description: Shown at the bottom of the Info tab, e.g. v1.0.9.
+  - type: dropdown
+    id: price
+    attributes:
+      label: Price addon
+      options:
+        - Auctionator
+        - TSM
+        - Both
+        - Neither
