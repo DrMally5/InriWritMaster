@@ -4,6 +4,7 @@
 
 - Opening a profession window no longer prints "Priced N writ recipes you know" every time. It only appears when WritMaster finds a recipe it didn't know about yet.
 - Writ customers in Riverglades can now be learned from quest map markers too.
+- Goal planner on the Info tab: how many days and how much gold to your next standing and to Exalted, if you do the 5, 10 or 20 best-value writs each day at current prices.
 - Window size setting: 90%, 100%, 110% or 125% on the Info tab, or any size from 80 to 150 with `/writ scale`.
 - Less chat spam: the "loaded" message only shows the first time, and the automatic shopping list refresh at the Auction House is silent. The login summary of writs ready to deliver can be turned off on the Info tab.
 - Cleaned up leftover settings from older versions.

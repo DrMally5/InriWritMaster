@@ -38,7 +38,7 @@ local DEFAULTS = {
   learned = {},        -- [questID] = {name, mapID, x, y}
   recipes = {},        -- [itemID] = {yield, {{reagentID, qty}, ...}}
   vendorCost = {},     -- [itemID] = favor cost seen at a vendor
-  settings = { tier = "ALL", ownedOnly = false, hideDone = false, craftOnly = false, sort = "eff", sortAsc = false, autoAH = true, autoCamp = true, minimap = true, minimapAngle = 200, tooltips = true, tipShift = true, prof = "MINE", scale = 1, loginSummary = true,
+  settings = { tier = "ALL", ownedOnly = false, hideDone = false, craftOnly = false, sort = "eff", sortAsc = false, autoAH = true, autoCamp = true, minimap = true, minimapAngle = 200, tooltips = true, tipShift = true, prof = "MINE", scale = 1, loginSummary = true, perDay = 10,
                vendorProf = 1 },
   pos = nil,
 }
@@ -1575,6 +1575,11 @@ local function ShowInfo()
   for _, v in ipairs({ 0.9, 1, 1.1, 1.25 }) do
     AddFilter2(fmt("%d%%", v * 100), 44, function() WM.SetScale(v); ShowInfo() end, math.abs((st.scale or 1) - v) < 0.01)
   end
+  local pd = AddFilter2("Writs/day", 64, function() end, false, "How many writs a day the goal planner assumes you do (the best-value ones).")
+  pd:SetActive(false)
+  for _, v in ipairs({ 5, 10, 20 }) do
+    AddFilter2(tostring(v), 30, function() st.perDay = v; ShowInfo() end, (st.perDay or 10) == v)
+  end
   AddFilter2("Login summary", 100, function() st.loginSummary = not st.loginSummary; ShowInfo() end, st.loginSummary,
     "When you log in, print how many writs in your bags are ready to deliver.")
   UI.list:SetColumns(INFO_COLS)
@@ -1591,9 +1596,33 @@ local function ShowInfo()
     local nextGoal
     for _, g in ipairs(WM.REP_GOALS) do if cur < g[2] then nextGoal = g; break end end
     if nextGoal then
-      local need = nextGoal[2] - cur
-      add(fmt("  %s rep to %s  ~ %d Journeyman / %d Expert / %d Artisan writs", col("white", need), col("gold", nextGoal[1]),
-        math.ceil(need / 75), math.ceil(need / 125), math.ceil(need / 200)))
+      -- goal planner: do the N best-value writs every day at current prices
+      local k = st.perDay or 10
+      local evals = {}
+      for _, w in ipairs(WM.WRITS) do
+        if not (w.ao and faction == "Horde") then
+          local e = EvalWrit(w)
+          if e.complete and e.total then evals[#evals + 1] = e end
+        end
+      end
+      table.sort(evals, function(a, b) return a.cpr < b.cpr end)
+      local repDay, goldDay, n = 0, 0, 0
+      for i = 1, math.min(k, #evals) do repDay = repDay + evals[i].w.r; goldDay = goldDay + evals[i].total; n = n + 1 end
+      add(col("gold", "Goal planner") .. col("grey", fmt("  doing the %d best-value writs each day: %s rep for about %s a day", n, repDay, Money(goldDay))))
+      if repDay > 0 then
+        local shown = 0
+        for _, g in ipairs(WM.REP_GOALS) do
+          if cur < g[2] and (shown == 0 or g[1] == "Exalted") then
+            local need = g[2] - cur
+            local days = math.ceil(need / repDay)
+            add(fmt("  %s: %s rep to go, about %s days and %s", col("gold", g[1]), col("white", need), col("white", days),
+              Money(goldDay * need / repDay)))
+            shown = shown + 1
+          end
+        end
+      else
+        add("  " .. col("grey", "No writ prices yet. Run an Auctionator scan at the Auction House."))
+      end
     else
       add("  " .. col("green", "Exalted. Nice."))
     end

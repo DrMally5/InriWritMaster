@@ -22,6 +22,7 @@ Type `/writ` to open it, or click the minimap button.
 - All Journeyman and 45 of 60 Expert customers are built in. Artisan customers are not published yet, and the game doesn't mark writ customers on the map. WritMaster remembers each new customer on your account the first time you turn that writ in.
 
 **Plan your day**
+- Goal planner on the Info tab: days and gold to your next standing and to Exalted, doing the 5, 10 or 20 best-value writs a day.
 - Shift-click a writ, or Ctrl-click several and press **Do today**. Planned writs are tinted gold.
 - **Shop list** creates an Auctionator shopping list called "WritMaster" with everything still missing for today's writs. It refreshes automatically when you open the Auction House.
 
