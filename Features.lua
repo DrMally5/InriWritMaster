@@ -215,8 +215,10 @@ function WM:ShoppingList(auto)
     if count > 0 then parts[#parts + 1] = fmt("%d %swrit%s", count, usePlan and "planned " or "", count == 1 and "" or "s") end
     if crates > 0 then parts[#parts + 1] = fmt("%d crate%s", crates, crates == 1 and "" or "s") end
     local what = table.concat(parts, " and ") .. (usePlan and "" or " in your bags")
-    H.Print(fmt("Shopping list %s %s with %d items for %s. Open it in Auctionator's Shopping tab.", col("white", "'WritMaster'"),
-      auto and "refreshed" or "created", #terms, what))
+    -- the automatic refresh at the Auction House stays quiet
+    if not auto then
+      H.Print(fmt("Shopping list %s created with %d items for %s. Open it in Auctionator's Shopping tab.", col("white", "'WritMaster'"), #terms, what))
+    end
   else
     H.Print("Could not create the shopping list: " .. tostring(err))
   end
@@ -312,7 +314,7 @@ ev:SetScript("OnEvent", function(_, event)
       for _, w in ipairs(WM.WRITS) do
         if (WM.owned[w.w] or 0) > 0 then if H.IsDoneToday(w.q) then cd = cd + 1 else ready = ready + 1 end end
       end
-      if ready + cd > 0 then
+      if ready + cd > 0 and WM.db.settings.loginSummary ~= false then
         H.Print(fmt("%d writ(s) ready to deliver, %d waiting for daily reset. %s", ready, cd, WM.ResetText()))
       end
     end)

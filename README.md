@@ -46,6 +46,7 @@ Type `/writ` to open it, or click the minimap button.
 | `/writ list` | Build the Auctionator shopping list |
 | `/writ clear` | Clear today's plan |
 | `/writ mm` | Show or hide the minimap button |
+| `/writ scale 80-150` | Window size in percent |
 
 `/writmaster` and `/iwm` work too.
 

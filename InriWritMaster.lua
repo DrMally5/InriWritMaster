@@ -38,7 +38,7 @@ local DEFAULTS = {
   learned = {},        -- [questID] = {name, mapID, x, y}
   recipes = {},        -- [itemID] = {yield, {{reagentID, qty}, ...}}
   vendorCost = {},     -- [itemID] = favor cost seen at a vendor
-  settings = { tier = "ALL", ownedOnly = false, hideDone = false, craftOnly = false, sort = "eff", sortAsc = false, autoAH = true, autoCamp = true, minimap = true, minimapAngle = 200, tooltips = true, tipShift = true, prof = "MINE",
+  settings = { tier = "ALL", ownedOnly = false, hideDone = false, craftOnly = false, sort = "eff", sortAsc = false, autoAH = true, autoCamp = true, minimap = true, minimapAngle = 200, tooltips = true, tipShift = true, prof = "MINE", scale = 1, loginSummary = true,
                vendorProf = 1 },
   pos = nil,
 }
@@ -882,6 +882,7 @@ local TIER_COL = { J = "ff1eff00", E = "ff0070dd", A = "ffa335ee" }
 local function BuildFrame()
   local f = CreateFrame("Frame", "InriWritMasterFrame", UIParent, "BackdropTemplate")
   f:SetSize(W, H)
+  f:SetScale(WM.db.settings.scale or 1)
   f:SetFrameStrata("HIGH")
   f:SetClampedToScreen(true)
   f:SetMovable(true); f:EnableMouse(true); f:RegisterForDrag("LeftButton")
@@ -1554,6 +1555,12 @@ end
 -- Tab 4: Info
 ---------------------------------------------------------------------------
 local INFO_COLS = { { title = "Reputation & Merchant's Favor", w = 820 } }
+function WM.SetScale(v)
+  v = math.max(0.8, math.min(1.5, v or 1))
+  WM.db.settings.scale = v
+  if UI.frame then UI.frame:SetScale(v) end
+end
+
 local function ShowInfo()
   ClearFilters()
   local st = WM.db.settings
@@ -1563,6 +1570,13 @@ local function ShowInfo()
   AddFilter("Row tips need Shift", 124, function() st.tipShift = not st.tipShift; ShowInfo() end, st.tipShift,
     "Only show the tooltip for a list row while you hold Shift.")
   AddFilter("Tooltips", 60, function() st.tooltips = not st.tooltips; ShowInfo() end, st.tooltips, "Add WritMaster info to item tooltips.")
+  local lbl = AddFilter2("Window size", 80, function() end, false, "Also: /writ scale 80 to 150")
+  lbl:SetActive(false)
+  for _, v in ipairs({ 0.9, 1, 1.1, 1.25 }) do
+    AddFilter2(fmt("%d%%", v * 100), 44, function() WM.SetScale(v); ShowInfo() end, math.abs((st.scale or 1) - v) < 0.01)
+  end
+  AddFilter2("Login summary", 100, function() st.loginSummary = not st.loginSummary; ShowInfo() end, st.loginSummary,
+    "When you log in, print how many writs in your bags are ready to deliver.")
   UI.list:SetColumns(INFO_COLS)
   UI.list.cellFn = function(it) return { it.text } end
   UI.tooltipFn = nil
@@ -1595,7 +1609,7 @@ local function ShowInfo()
   add(" ")
   add(col("gold", "Commands"))
   add("  /writ (or /writmaster, /iwm)  toggle window       /writ route  delivery route for writs in your bags")
-  add("  /writ list  Auctionator shopping list       /writ mm  toggle minimap button")
+  add("  /writ list  Auctionator shopping list       /writ mm  toggle minimap button       /writ scale 80-150  window size")
   add("  Ctrl-click to select several writs, then Do today; Shift-click toggles one. Drop all or /writ clear empties the plan")
   add("  /writ scan  re-read bags       /writ reset  reset window position       /writ forget  clear learned customers")
   add("  /writ vendor  print a camp vendor's Favor prices (with the vendor window open)")
@@ -1686,8 +1700,14 @@ ev:SetScript("OnEvent", function(_, event, arg1)
     InriWritMasterDB = fill(InriWritMasterDB or {}, DEFAULTS)
     InriWritMasterCharDB = fill(InriWritMasterCharDB or {}, CHAR_DEFAULTS)
     WM.db, WM.cdb = InriWritMasterDB, InriWritMasterCharDB
+    -- settings from older versions that no longer exist
+    for _, k in ipairs({ "ownedWritFree", "crateUseBags", "crateBags" }) do WM.db.settings[k] = nil end
   elseif event == "PLAYER_LOGIN" then
-    Print("loaded. Type " .. col("white", "/writ") .. " or " .. col("white", "/writmaster") .. " to open.")
+    -- say hello once, not on every login
+    if not WM.db.welcomed then
+      Print("loaded. Type " .. col("white", "/writ") .. " or click the minimap button to open.")
+      WM.db.welcomed = true
+    end
     ScanBags()
     for _, e in ipairs({ "BAG_UPDATE_DELAYED", "QUEST_COMPLETE", "QUEST_TURNED_IN", "TRADE_SKILL_SHOW", "TRADE_SKILL_LIST_UPDATE",
                          "MERCHANT_SHOW", "GET_ITEM_INFO_RECEIVED", "QUEST_ACCEPTED", "QUEST_LOG_UPDATE", "UPDATE_FACTION", "CURRENCY_DISPLAY_UPDATE",
@@ -1765,9 +1785,13 @@ SlashCmdList.INRIWRITMASTER = function(msg)
       Print(fmt("  %s: %s", link or ("item " .. i), #parts > 0 and table.concat(parts, ", ") or "gold only"))
     end
   elseif msg == "clear" then if WM.cdb then WM.cdb.plan = nil end; Print("Today's list cleared."); if UI.list then UI.list.multi = false end; WM:Refresh()
+  elseif msg:match("^scale") then
+    local n = tonumber(msg:match("(%d+)"))
+    if not n then Print("Usage: /writ scale 80 to 150 (percent). Now " .. floor((WM.db.settings.scale or 1) * 100 + 0.5) .. "%.")
+    else WM.SetScale(n / 100); Print(fmt("Window size %d%%.", floor(WM.db.settings.scale * 100 + 0.5))) end
   elseif msg == "mm" or msg == "minimap" then WM.db.settings.minimap = not WM.db.settings.minimap; if WM.UpdateMinimap then WM.UpdateMinimap() end
   elseif msg == "help" then
-    Print("/writ, /writ route, /writ list, /writ clear, /writ mm, /writ scan, /writ vendor, /writ reset, /writ forget")
+    Print("/writ, /writ route, /writ list, /writ clear, /writ mm, /writ scale, /writ scan, /writ vendor, /writ reset, /writ forget")
   else
     local ok, err = xpcall(function() WM:Toggle() end, function(e) return tostring(e) .. "\n" .. (debugstack and debugstack(2, 6, 0) or "") end)
     if not ok then Print(col("red", "error opening window:") .. " " .. tostring(err)) end
