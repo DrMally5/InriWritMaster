@@ -1054,16 +1054,46 @@ end
 
 -- filter widgets (rebuilt per tab)
 local filterWidgets = {}
-local filterWidgets2 = {}
+local filterWidgets2, groupBoxes = {}, {}
 local function ClearFilters()
   for _, w in ipairs(filterWidgets) do w:Hide() end wipe(filterWidgets)
   for _, w in ipairs(filterWidgets2) do w:Hide() end wipe(filterWidgets2)
+  for _, w in ipairs(groupBoxes) do w:Hide() end wipe(groupBoxes)
+end
+local function NextX2()
+  local x = 0
+  for _, o in ipairs(filterWidgets2) do x = x + o:GetWidth() + 4 end
+  return x
+end
+-- a plain text label (not a button) that starts a bracketed group on the second filter row
+local function BeginGroup2(text, w, tip)
+  local l = CreateFrame("Frame", nil, UI.filters2)
+  l:SetSize(w, 20); l:SetPoint("LEFT", NextX2(), 0)
+  l.text = l:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+  l.text:SetPoint("LEFT", 4, 0); l.text:SetText(text)
+  if tip then
+    l:EnableMouse(true)
+    l:SetScript("OnEnter", function(s) GameTooltip:SetOwner(s, "ANCHOR_BOTTOM"); GameTooltip:SetText(tip, 1, 1, 1, 1, true); GameTooltip:Show() end)
+    l:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  end
+  l.groupStart = true
+  filterWidgets2[#filterWidgets2 + 1] = l
+  return #filterWidgets2
+end
+-- draw a thin box around the label and its buttons, then leave a gap before the next group
+local function EndGroup2(first)
+  local a, b = filterWidgets2[first], filterWidgets2[#filterWidgets2]
+  local box = CreateFrame("Frame", nil, UI.filters2, "BackdropTemplate")
+  Skin(box, { 0, 0, 0, 0.25 }, { 0.40, 0.33, 0.18, 0.8 }, true)
+  box:SetPoint("TOPLEFT", a, "TOPLEFT", 0, 2); box:SetPoint("BOTTOMRIGHT", b, "BOTTOMRIGHT", 3, -2)
+  box:SetFrameLevel(math.max(0, UI.filters2:GetFrameLevel()))
+  groupBoxes[#groupBoxes + 1] = box
+  local gap = CreateFrame("Frame", nil, UI.filters2); gap:SetSize(6, 20)
+  filterWidgets2[#filterWidgets2 + 1] = gap
 end
 local function AddFilter2(text, w, onClick, active, tip)
   local b = Button(UI.filters2, text, w, 20, onClick)
-  local x = 0
-  for _, o in ipairs(filterWidgets2) do x = x + o:GetWidth() + 4 end
-  b:SetPoint("LEFT", x, 0)
+  b:SetPoint("LEFT", NextX2(), 0)
   b:SetActive(active)
   if tip then
     b:HookScript("OnEnter", function(s) GameTooltip:SetOwner(s, "ANCHOR_BOTTOM"); GameTooltip:SetText(tip, 1, 1, 1, 1, true); GameTooltip:Show() end)
@@ -1591,16 +1621,16 @@ local function ShowInfo()
   AddFilter("Row tips need Shift", 124, function() st.tipShift = not st.tipShift; ShowInfo() end, st.tipShift,
     "Only show the tooltip for a list row while you hold Shift.")
   AddFilter("Tooltips", 60, function() st.tooltips = not st.tooltips; ShowInfo() end, st.tooltips, "Add WritMaster info to item tooltips.")
-  local lbl = AddFilter2("Window size", 80, function() end, false, "Also: /writ scale 80 to 150")
-  lbl:SetActive(false)
+  local g = BeginGroup2("Window size", 66, "Size of the WritMaster window. Also: /writ scale 80 to 150")
   for _, v in ipairs({ 0.9, 1, 1.1, 1.25 }) do
-    AddFilter2(fmt("%d%%", v * 100), 44, function() WM.SetScale(v); ShowInfo() end, math.abs((st.scale or 1) - v) < 0.01)
+    AddFilter2(fmt("%d%%", v * 100), 40, function() WM.SetScale(v); ShowInfo() end, math.abs((st.scale or 1) - v) < 0.01)
   end
-  local pd = AddFilter2("Writs/day", 64, function() end, false, "How many writs a day the goal planner assumes you do (the best-value ones).")
-  pd:SetActive(false)
+  EndGroup2(g)
+  g = BeginGroup2("Writs/day", 56, "How many writs a day the goal planner assumes you do (the best-value ones).")
   for _, v in ipairs({ 5, 10, 20 }) do
     AddFilter2(tostring(v), 30, function() st.perDay = v; ShowInfo() end, (st.perDay or 10) == v)
   end
+  EndGroup2(g)
   AddFilter2("Prefer TSM", 80, function() st.preferTSM = not st.preferTSM; wipe(priceCache); ShowInfo() end, st.preferTSM,
     HasTSM() and "Use TradeSkillMaster prices first and Auctionator only where TSM has none. Off: Auctionator first, TSM as backup."
     or "TradeSkillMaster isn't loaded. When it is, WritMaster uses its prices wherever Auctionator has none.")
