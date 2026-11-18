@@ -1,5 +1,9 @@
 # Inri's WritMaster
 
+## v1.0.9 (2026-11-18)
+
+- Now also available on Wago Addons. No gameplay changes.
+
 ## v1.0.8 (2026-11-18)
 
 - Goal planner on the Info tab: how many days and how much gold to your next standing and to Exalted, if you do the 5, 10 or 20 best-value writs each day at current prices.
