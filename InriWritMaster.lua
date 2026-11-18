@@ -540,7 +540,7 @@ function WM:Route()
     DEFAULT_CHAT_FRAME:AddMessage(fmt("   %d. %s (%.1f, %.1f): %s", i, col("white", s.name), s.x, s.y, table.concat(names, ", ")))
   end
   for _, w in ipairs(unknown) do
-    DEFAULT_CHAT_FRAME:AddMessage("   ? " .. col("orange", ItemName(w.i) or w.i) .. col("grey", " — customer not mapped yet; follow the quest marker"))
+    DEFAULT_CHAT_FRAME:AddMessage("   ? " .. col("orange", ItemName(w.i) or w.i) .. col("grey", " — customer not known yet; it is saved when you turn this writ in"))
   end
   if ordered[1] then self:Waypoint(ordered[1].map, ordered[1].x, ordered[1].y, ordered[1].name) end
 end
