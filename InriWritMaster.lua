@@ -1068,9 +1068,14 @@ end
 -- a plain text label (not a button) that starts a bracketed group on the second filter row
 local function BeginGroup2(text, w, tip)
   local l = CreateFrame("Frame", nil, UI.filters2)
-  l:SetSize(w, 20); l:SetPoint("LEFT", NextX2(), 0)
-  l.text = l:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  l.text:SetPoint("LEFT", 4, 0); l.text:SetText(text)
+  l:SetPoint("LEFT", NextX2(), 0)
+  l.text = l:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  l.text:SetPoint("LEFT", 7, 0); l.text:SetText(text)
+  l.text:SetTextColor(0.78, 0.66, 0.38)
+  -- size the label to its text so it never touches the first option
+  local tw = l.text:GetStringWidth()
+  l:SetSize(math.max(w, (type(tw) == "number" and tw or 0) + 14), 20)
+  UI.inGroup2 = true
   if tip then
     l:EnableMouse(true)
     l:SetScript("OnEnter", function(s) GameTooltip:SetOwner(s, "ANCHOR_BOTTOM"); GameTooltip:SetText(tip, 1, 1, 1, 1, true); GameTooltip:Show() end)
@@ -1082,17 +1087,19 @@ local function BeginGroup2(text, w, tip)
 end
 -- draw a thin box around the label and its buttons, then leave a gap before the next group
 local function EndGroup2(first)
+  UI.inGroup2 = false
   local a, b = filterWidgets2[first], filterWidgets2[#filterWidgets2]
   local box = CreateFrame("Frame", nil, UI.filters2, "BackdropTemplate")
   Skin(box, { 0, 0, 0, 0.25 }, { 0.40, 0.33, 0.18, 0.8 }, true)
-  box:SetPoint("TOPLEFT", a, "TOPLEFT", 0, 2); box:SetPoint("BOTTOMRIGHT", b, "BOTTOMRIGHT", 3, -2)
+  box:SetPoint("TOPLEFT", a, "TOPLEFT", 0, 0); box:SetPoint("BOTTOM", a, "BOTTOM", 0, 0); box:SetPoint("RIGHT", b, "RIGHT", 2, 0)
   box:SetFrameLevel(math.max(0, UI.filters2:GetFrameLevel()))
   groupBoxes[#groupBoxes + 1] = box
-  local gap = CreateFrame("Frame", nil, UI.filters2); gap:SetSize(6, 20)
+  local gap = CreateFrame("Frame", nil, UI.filters2); gap:SetSize(10, 20)
   filterWidgets2[#filterWidgets2 + 1] = gap
 end
 local function AddFilter2(text, w, onClick, active, tip)
-  local b = Button(UI.filters2, text, w, 20, onClick)
+  -- options inside a bracketed group are a little shorter so the box frames them evenly
+  local b = Button(UI.filters2, text, w, UI.inGroup2 and 16 or 20, onClick)
   b:SetPoint("LEFT", NextX2(), 0)
   b:SetActive(active)
   if tip then
