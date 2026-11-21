@@ -166,6 +166,13 @@ local function AHAge(id)
   if ok and type(d) == "number" then return d end
 end
 
+-- Freshness of writ prices: newest age (days) among the three sealed writs, or nil.
+local function WritPriceAge()
+  local age
+  for _, id in pairs(WM.SEALED) do local a = AHAge(id); if a and (not age or a < age) then age = a end end
+  return age
+end
+
 -- Reagent price: vendor price if it is a vendor reagent, else AH.
 local function ReagentPrice(id)
   local v = WM.VENDOR_REAGENTS[id]
@@ -850,6 +857,7 @@ local function CreateList(parent, top, bottom)
   end
 
   function L:Render()
+    if WM.UpdateShopLabel then WM.UpdateShopLabel() end
     for i, r in ipairs(self.rows) do
       local item = self.data[i + self.offset]
       r.item = item
@@ -1003,8 +1011,20 @@ local function BuildFrame()
 
   UI.btnWay = Button(f, "Waypoint", 70, 20, function() if UI.wayTarget then WM:Waypoint(unpack(UI.wayTarget)) end end)
   UI.btnWay:SetPoint("BOTTOMRIGHT", -156, 12)
-  UI.btnShop = Button(f, "Search AH", 70, 20, function() WM:ShopSelected() end)
+  UI.btnShop = Button(f, "Search all", 70, 20, function() WM:ShopSelected() end)
   UI.btnShop:SetPoint("BOTTOMRIGHT", -82, 12)
+  UI.btnShop:HookScript("OnEnter", function(s)
+    GameTooltip:SetOwner(s, "ANCHOR_TOP")
+    GameTooltip:AddLine(s.text:GetText() or "Search")
+    GameTooltip:AddLine("Searches the Auction House through Auctionator. Results show in Auctionator's Shopping tab.", 1, 1, 1, true)
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddLine(col("gold", "Nothing selected:") .. " every row in the list (follows your filters)", 1, 1, 1, true)
+    GameTooltip:AddLine(col("gold", "One or more selected:") .. " just those rows", 1, 1, 1, true)
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddLine(col("grey", "Writs: the writ, the requested item and the sealed writ. Crates: the crate and its fill materials. A long list takes a few minutes; Auctionator's Full Scan refreshes every price at once."), 1, 1, 1, true)
+    GameTooltip:Show()
+  end)
+  UI.btnShop:HookScript("OnLeave", function() GameTooltip:Hide() end)
   UI.btnList = Button(f, "Shop list", 70, 20, function() WM:ShoppingList() end)
   UI.btnList:SetPoint("BOTTOMRIGHT", -240, 12)
   UI.btnList:SetActive(true)   -- primary action: always gold
@@ -1148,8 +1168,7 @@ local function UpdateHeader()
   local ah = (HasAuctionator() or HasTSM()) and "" or col("red", "Auctionator or TSM needed for prices   ")
   if ah == "" then
     -- freshness of writ prices: newest age among the three sealed writs
-    local age
-    for _, id in pairs(WM.SEALED) do local a = AHAge(id); if a and (not age or a < age) then age = a end end
+    local age = WritPriceAge()
     -- Auctionator only records the calendar day an item was seen (local midnight), so 1 just means "yesterday"
     if age and age >= 2 then ah = col("orange", fmt("prices %d days old   ", age))
     elseif age == 1 then ah = col("grey", "prices from yesterday   ") end
@@ -1381,25 +1400,80 @@ local function ShowWrits()
     else
       UI.detail1:SetText(col("grey", fmt("%d writs. In bags: %d (%d turned in today). Shift-click to plan today.", #rows, own, done)))
     end
-    UI.detail2:SetText("~ sealed-writ estimate   c crafted   * partial price   Rep/gold: green = best")
+    local age = WritPriceAge()
+    if age and age >= 1 then
+      UI.detail2:SetText(col("orange", age == 1 and "Prices are from yesterday." or fmt("Prices are %d days old.", age)) ..
+        " At the AH, press Search all or use Auctionator's Full Scan to refresh them.")
+    else
+      UI.detail2:SetText("~ sealed-writ estimate   c crafted   * partial price   Rep/gold: green = best")
+    end
     UI.btnWay:SetEnabled(false)
   end
 end
 
+-- Label for the Search button: "Search all" with nothing selected, "Search AH" otherwise.
+function WM.UpdateShopLabel()
+  if not (UI.btnShop and UI.list) then return end
+  local m = UI.list.multi
+  local sel = (m and next(m)) or (UI.selected and (UI.selected.w or UI.selected.c))
+  UI.btnShop.text:SetText(sel and "Search AH" or "Search all")
+end
+
+-- Search the AH (via Auctionator) for the selected rows, or every row in the list when nothing is selected.
 function WM:ShopSelected()
-  local e = UI.selected
-  if not (e and e.w) then Print("Select a writ first.") return end
   if not HasAuctionator() or type(Auctionator.API.v1.MultiSearchExact) ~= "function" then
     Print("Auctionator search needs Auctionator loaded and the Auction House open."); return
   end
-  local terms = {}
-  local n1 = ItemName(e.w.i); if n1 then terms[#terms + 1] = n1 end
-  if not e.owned then
-    local n2 = ItemName(e.w.w); if n2 then terms[#terms + 1] = n2 end
-    local n3 = ItemName(WM.SEALED[e.w.t]); if n3 then terms[#terms + 1] = n3 end
+  local terms, seen, missing = {}, {}, 0
+  local function add(id)
+    if not id then return end
+    local n = ItemName(id)
+    if not n then missing = missing + 1 elseif not seen[n] then seen[n] = true; terms[#terms + 1] = n end
+  end
+  local function addWrit(w, owned)
+    add(w.i)
+    if not owned then add(w.w); add(WM.SEALED[w.t]) end
+  end
+  local function addCrate(c)
+    add(c.id)
+    for _, o in ipairs(c.opts) do add(o[1]) end
+  end
+  local m = UI.list.multi
+  local data = UI.list.data or {}
+  local all = false
+  if UI.tab == 2 then
+    if m and next(m) then
+      for _, r in ipairs(data) do if r.c and m[r.key] then addCrate(r.c) end end
+    elseif UI.selected and UI.selected.c then
+      addCrate(UI.selected.c)
+    else
+      all = true
+      for _, r in ipairs(data) do if r.c then addCrate(r.c) end end
+    end
+  else
+    if m and next(m) then
+      for q in pairs(m) do
+        local w = WM.byQuest and WM.byQuest[q]
+        if w then addWrit(w, (WM.owned[w.w] or 0) > 0) end
+      end
+    elseif UI.selected and UI.selected.w then
+      addWrit(UI.selected.w, UI.selected.owned)
+    else
+      all = true
+      for _, r in ipairs(data) do if r.w then addWrit(r.w, r.owned) end end
+    end
+  end
+  if #terms == 0 then
+    Print(missing > 0 and "Item names are still loading. Press it again in a moment." or "Nothing to search in this list."); return
   end
   local ok, err = pcall(Auctionator.API.v1.MultiSearchExact, CALLER, terms)
-  if not ok then Print("Open the Auction House first. (" .. tostring(err) .. ")") end
+  if not ok then Print("Open the Auction House first. (" .. tostring(err) .. ")"); return end
+  if all or #terms > 3 then
+    local msg = fmt("Searching %d items in Auctionator's Shopping tab.", #terms)
+    if missing > 0 then msg = msg .. fmt(" %d names were still loading; press again to include them.", missing) end
+    if #terms > 40 then msg = msg .. " This takes a few minutes. Auctionator's Full Scan refreshes every price at once." end
+    Print(msg)
+  end
 end
 
 ---------------------------------------------------------------------------
@@ -1521,7 +1595,7 @@ function ShowCrates()
   end
   UI.detail2:SetText("Sorted by Merchant's Favor per gold. Everything is priced at AH value, even what is already in your bags. Green crates give double Favor.")
   UI.wayTarget = { camp.map, camp.x, camp.y, camp.intake }
-  UI.btnWay:SetEnabled(true); UI.btnShop:Hide(); UI.btnRoute:Hide(); UI.btnWay:Show()
+  UI.btnWay:SetEnabled(true); UI.btnShop:Show(); UI.btnRoute:Hide(); UI.btnWay:Show()
   UI.btnList:Show(); UI.btnPlan:Show(); UI.btnDropAll:Show(); UI.btnDropAll:SetEnabled(next(PlanFor(UI.tab)) ~= nil); UI.btnPlan.text:SetText("Do today"); UI.btnList.text:SetText(ShopLabel())
 end
 

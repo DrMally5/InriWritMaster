@@ -1,5 +1,11 @@
 # Inri's WritMaster
 
+## v1.0.10 (2026-11-21)
+
+- New **Search all** button: with nothing selected, it searches the Auction House (through Auctionator) for every writ in the list, covering the named writ, the requested item and the sealed writ. It follows your filters, so "Mine" or one profession keeps it short. Select one or Ctrl-select several rows to search just those.
+- The search button now also appears on the Crates tab, where it searches the crates and their fill materials.
+- When prices are a day or more old, the Writs tab tells you how to refresh them: press Search all, or use Auctionator's Full Scan.
+
 ## v1.0.9 (2026-11-18)
 
 - Now also available on Wago Addons. No gameplay changes.
