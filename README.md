@@ -25,7 +25,7 @@ Type `/writ` to open it, or click the minimap button.
 - Goal planner on the Info tab: days and gold to your next standing and to Exalted, doing the 5, 10 or 20 best-value writs a day.
 - Shift-click a writ, or Ctrl-click several and press **Do today**. Planned writs are tinted gold.
 - **Shop list** creates an Auctionator shopping list called "WritMaster" with everything still missing for today's writs. It refreshes automatically when you open the Auction House.
-- **Search all** at the Auction House searches every writ in the list (or every crate and its materials on the Crates tab) through Auctionator in one click. It follows your filters, and selecting rows searches just those.
+- **Scan all** at the Auction House searches every writ in the list (or every crate and its materials on the Crates tab) through Auctionator in one click. It follows your filters, and selecting rows searches just those.
 
 **Tooltips**
 - Writs in your bags and on the AH show rep, total cost, rep per gold, the customer and a **BUY / SKIP** verdict.

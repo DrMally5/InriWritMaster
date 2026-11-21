@@ -1,5 +1,9 @@
 # Inri's WritMaster
 
+## v1.0.11 (2026-11-21)
+
+- The search-everything button is now called **Scan all**.
+
 ## v1.0.10 (2026-11-21)
 
 - New **Search all** button: with nothing selected, it searches the Auction House (through Auctionator) for every writ in the list, covering the named writ, the requested item and the sealed writ. It follows your filters, so "Mine" or one profession keeps it short. Select one or Ctrl-select several rows to search just those.

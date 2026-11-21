@@ -1011,7 +1011,7 @@ local function BuildFrame()
 
   UI.btnWay = Button(f, "Waypoint", 70, 20, function() if UI.wayTarget then WM:Waypoint(unpack(UI.wayTarget)) end end)
   UI.btnWay:SetPoint("BOTTOMRIGHT", -156, 12)
-  UI.btnShop = Button(f, "Search all", 70, 20, function() WM:ShopSelected() end)
+  UI.btnShop = Button(f, "Scan all", 70, 20, function() WM:ShopSelected() end)
   UI.btnShop:SetPoint("BOTTOMRIGHT", -82, 12)
   UI.btnShop:HookScript("OnEnter", function(s)
     GameTooltip:SetOwner(s, "ANCHOR_TOP")
@@ -1403,7 +1403,7 @@ local function ShowWrits()
     local age = WritPriceAge()
     if age and age >= 1 then
       UI.detail2:SetText(col("orange", age == 1 and "Prices are from yesterday." or fmt("Prices are %d days old.", age)) ..
-        " At the AH, press Search all or use Auctionator's Full Scan to refresh them.")
+        " At the AH, press Scan all or use Auctionator's Full Scan to refresh them.")
     else
       UI.detail2:SetText("~ sealed-writ estimate   c crafted   * partial price   Rep/gold: green = best")
     end
@@ -1411,12 +1411,12 @@ local function ShowWrits()
   end
 end
 
--- Label for the Search button: "Search all" with nothing selected, "Search AH" otherwise.
+-- Label for the Search button: "Scan all" with nothing selected, "Search AH" otherwise.
 function WM.UpdateShopLabel()
   if not (UI.btnShop and UI.list) then return end
   local m = UI.list.multi
   local sel = (m and next(m)) or (UI.selected and (UI.selected.w or UI.selected.c))
-  UI.btnShop.text:SetText(sel and "Search AH" or "Search all")
+  UI.btnShop.text:SetText(sel and "Search AH" or "Scan all")
 end
 
 -- Search the AH (via Auctionator) for the selected rows, or every row in the list when nothing is selected.
