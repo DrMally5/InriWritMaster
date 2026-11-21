@@ -1,6 +1,6 @@
 # Inri's WritMaster
 
-## v1.0.11 (2026-11-21)
+## Next release
 
 - The search-everything button is now called **Scan all**.
 
