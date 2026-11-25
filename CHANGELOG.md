@@ -1,6 +1,6 @@
 # Inri's WritMaster
 
-## Next release
+## v1.0.11 (2026-11-25)
 
 - 47 more writ customers built in, from Questie's latest database: every Expert writ now has its customer, and 32 of 45 Artisan writs do (up from none). New zones include Azshara, Blasted Lands, Burning Steppes, Deadwind Pass, the Plaguelands, Winterspring and Mount Hyjal.
 - Fixed the location of the Free Action Potion customer (Webbed Mudsnout Gnoll, Hillsbrad Foothills).
