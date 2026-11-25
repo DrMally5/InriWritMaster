@@ -576,6 +576,7 @@ end
 local ZONE_MAPS = {}
 for m = 1411, 1458 do ZONE_MAPS[#ZONE_MAPS + 1] = m end
 ZONE_MAPS[#ZONE_MAPS + 1] = 2548   -- Riverglades
+ZONE_MAPS[#ZONE_MAPS + 1] = 2482   -- Mount Hyjal
 local function LearnFromQuestLog()
   if not (C_QuestLog and C_QuestLog.GetQuestsOnMap and C_QuestLog.GetLogIndexForQuestID) then return 0 end
   local want, any = {}, false

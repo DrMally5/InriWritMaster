@@ -23,7 +23,8 @@ WM.ZONES = { [1418]="Badlands", [1431]="Duskwood", [1437]="Wetlands", [1434]="St
   [1433]="Redridge Mountains", [1413]="The Barrens",
   [1448]="Felwood", [1445]="Dustwallow Marsh", [1451]="Silithus", [1450]="Moonglade", [1444]="Feralas",
   [1435]="Swamp of Sorrows", [1425]="The Hinterlands", [1427]="Searing Gorge", [1443]="Desolace", [1446]="Tanaris",
-  [1449]="Un'Goro Crater", [2548]="Riverglades" }
+  [1449]="Un'Goro Crater", [2548]="Riverglades",
+  [1419]="Blasted Lands", [1422]="Western Plaguelands", [1423]="Eastern Plaguelands", [1428]="Burning Steppes", [1430]="Deadwind Pass", [1447]="Azshara", [1452]="Winterspring", [2482]="Mount Hyjal" }
 
 -- Craftsman's Writs.  q=quest, w=named writ item, i=requested item, n=qty, t=tier, p=profession, s=skill, r=rep,
 -- zh=zone hint only. c={customer, uiMapID, x, y} (nil = not confirmed yet; learned automatically when you turn the writ in), ao=Alliance-only
@@ -32,7 +33,7 @@ WM.WRITS = {
   {q=94212, w=264012, i=3383, n=1, t="J", p="AL", s=120, r=75, c={"Muggol Breezebeard", 1417, 48.6, 55.8}}, -- Elixir of Wisdom
   {q=94213, w=264013, i=3385, n=1, t="J", p="AL", s=145, r=75, c={"Ash'alari", 1440, 59.9, 72.1}}, -- Lesser Mana Potion
   {q=94214, w=264014, i=6048, n=1, t="J", p="AL", s=160, r=75, c={"Kzixx", 1431, 81.8, 19.8}, ao=true}, -- Shadow Protection Potion
-  {q=94215, w=264015, i=5634, n=1, t="J", p="AL", s=175, r=75, c={"Webbed Mudsnout Gnoll", 1424, 62.4, 67.2}}, -- Free Action Potion
+  {q=94215, w=264015, i=5634, n=1, t="J", p="AL", s=175, r=75, c={"Webbed Mudsnout Gnoll", 1424, 62.4, 69.2}}, -- Free Action Potion
   {q=94216, w=264016, i=3390, n=1, t="J", p="AL", s=165, r=75, c={"Ziz Fizziks", 1442, 59.0, 62.6}}, -- Elixir of Lesser Agility
   {q=94217, w=264017, i=3388, n=1, t="J", p="AL", s=150, r=75, c={"Short John Mithril", 1434, 29.6, 47.4}}, -- Strong Troll's Blood Potion
   {q=94218, w=264018, i=8951, n=1, t="J", p="AL", s=215, r=75, c={"Rizzle Brassbolts", 1441, 77.2, 77.4}}, -- Elixir of Greater Defense
@@ -88,27 +89,27 @@ WM.WRITS = {
   {q=94268, w=264068, i=7922, n=1, t="E", p="BL", s=210, r=125, c={"Furious Shadowforge Digger", 1418, 44.3, 11.4}}, -- Steel Plate Helm
   {q=94269, w=264069, i=9060, n=1, t="E", p="BL", s=200, r=125, c={"Bibbly F'utzbuckle", 1443, 62.3, 39.0}}, -- Inlaid Mithril Cylinder
   {q=94270, w=264070, i=6041, n=1, t="E", p="BL", s=190, r=125, c={"Ugbert", 1445, 40.9, 28.0}}, -- Steel Weapon Chain
-  {q=94271, w=264071, i=7928, n=1, t="E", p="BL", s=220, r=125, c=nil}, -- Ornate Mithril Shoulder
+  {q=94271, w=264071, i=7928, n=1, t="E", p="BL", s=220, r=125, c={"Taronn Redfeather", 1448, 50.9, 81.6}}, -- Ornate Mithril Shoulder
   {q=94272, w=264072, i=7942, n=1, t="E", p="BL", s=220, r=125, c={"Scout Raroul", 1444, 72.4, 52.5}}, -- Blue Glittering Axe
-  {q=94273, w=264073, i=3853, n=1, t="E", p="BL", s=180, r=125, c=nil}, -- Moonsteel Broadsword
+  {q=94273, w=264073, i=3853, n=1, t="E", p="BL", s=180, r=125, c={"Meliri", 1450, 51.2, 42.3}}, -- Moonsteel Broadsword
   {q=94274, w=264074, i=3837, n=1, t="E", p="BL", s=190, r=125, c={"Spek", 2548, 76.9, 54.1}}, -- Golden Scale Coif
   {q=94275, w=264075, i=7964, n=1, t="E", p="BL", s=175, r=125, c={"Master Smith Burninate", 1427, 38.8, 28.5}}, -- Solid Sharpening Stone
-  {q=94276, w=264076, i=7943, n=1, t="E", p="BL", s=225, r=125, c=nil}, -- Wicked Mithril Blade
+  {q=94276, w=264076, i=7943, n=1, t="E", p="BL", s=225, r=125, c={"Mukomonji", 1435, 62.4, 52.9}}, -- Wicked Mithril Blade
   {q=94277, w=264077, i=11144, n=1, t="E", p="BL", s=180, r=125, c={"Spigot Operator Luglunket", 1446, 52.5, 28.4}}, -- Truesilver Rod
-  {q=94278, w=264078, i=9366, n=1, t="E", p="BL", s=200, r=125, c=nil}, -- Golden Scale Gauntlets
-  {q=94279, w=264079, i=7941, n=1, t="E", p="BL", s=210, r=125, c=nil}, -- Heavy Mithril Axe
-  {q=94280, w=264080, i=4396, n=1, t="E", p="EN", s=220, r=125, c=nil}, -- Mechanical Dragonling
+  {q=94278, w=264078, i=9366, n=1, t="E", p="BL", s=200, r=125, c={"Gilveradin Sunchaser", 1425, 26.7, 48.6}}, -- Golden Scale Gauntlets
+  {q=94279, w=264079, i=7941, n=1, t="E", p="BL", s=210, r=125, c={"Torwa Pathfinder", 1449, 71.6, 76.0}}, -- Heavy Mithril Axe
+  {q=94280, w=264080, i=4396, n=1, t="E", p="EN", s=220, r=125, c={"Garyanne Fleezlebop", 1418, 67.7, 51.7}}, -- Mechanical Dragonling
   {q=94281, w=264081, i=4392, n=1, t="E", p="EN", s=185, r=125, c={"Bibbly F'utzbuckle", 1443, 62.3, 39.0}}, -- Advanced Target Dummy
   {q=94282, w=264082, i=4393, n=1, t="E", p="EN", s=205, r=125, c={"The Ravenous", 1445, 54.0, 56.5}}, -- Craftsman's Monocle
   {q=94283, w=264083, i=4395, n=1, t="E", p="EN", s=215, r=125, c={"Jessir Moonbow", 1448, 51.4, 82.0}}, -- Goblin Land Mine
-  {q=94284, w=264084, i=10501, n=1, t="E", p="EN", s=240, r=125, c=nil}, -- Catseye Ultra Goggles
+  {q=94284, w=264084, i=10501, n=1, t="E", p="EN", s=240, r=125, c={"Scout Raroul", 1444, 72.4, 52.5}}, -- Catseye Ultra Goggles
   {q=94285, w=264085, i=10560, n=1, t="E", p="EN", s=200, r=125, c={"Narianna", 1450, 53.3, 42.7}}, -- Unstable Trigger
   {q=94286, w=264086, i=4852, n=1, t="E", p="EN", s=185, r=125, c={"Spek", 2548, 76.9, 54.1}}, -- Flash Bomb
-  {q=94287, w=264087, i=10500, n=1, t="E", p="EN", s=225, r=125, c=nil}, -- Fire Goggles
+  {q=94287, w=264087, i=10500, n=1, t="E", p="EN", s=225, r=125, c={"Durganon", 1427, 41.1, 58.3}}, -- Fire Goggles
   {q=94288, w=264088, i=10514, n=1, t="E", p="EN", s=215, r=125, c={"Bullets Bigblast", 1435, 70.0, 41.6}}, -- Mithril Frag Bomb
   {q=94289, w=264089, i=10498, n=1, t="E", p="EN", s=175, r=125, c={"Jhordy Lapforge", 1446, 52.3, 26.9}}, -- Gyromatic Micro-Adjustor
   {q=94290, w=264090, i=11590, n=1, t="E", p="EN", s=200, r=125, c={"Rhapsody Shindigger", 1425, 26.9, 48.6}}, -- Mechanical Repair Kit
-  {q=94291, w=264091, i=16005, n=1, t="E", p="EN", s=305, r=125, c=nil}, -- Dark Iron Bomb
+  {q=94291, w=264091, i=16005, n=1, t="E", p="EN", s=305, r=125, c={"Gibbert", 1449, 44.1, 7.2}}, -- Dark Iron Bomb
   {q=94292, w=264092, i=8174, n=1, t="E", p="LW", s=195, r=125, c={"Garek", 1418, 61.9, 54.3}}, -- Comfortable Leather Hat
   {q=94293, w=264093, i=5965, n=1, t="E", p="LW", s=180, r=125, c={"Azore Aldamort", 1443, 38.9, 27.2}}, -- Guardian Cloak
   {q=94294, w=264094, i=7378, n=1, t="E", p="LW", s=180, r=125, c={"The Ravenous", 1445, 54.0, 56.5}}, -- Dusky Bracers
@@ -121,63 +122,63 @@ WM.WRITS = {
   {q=94301, w=264101, i=8200, n=1, t="E", p="LW", s=210, r=125, c={"Yeh'kinya", 1446, 67.0, 22.4}}, -- Big Voodoo Robe
   {q=94302, w=264102, i=8189, n=1, t="E", p="LW", s=205, r=125, c={"Juo", 1425, 80.1, 55.4}}, -- Turtle Scale Breastplate
   {q=94303, w=264103, i=8218, n=1, t="E", p="LW", s=220, r=125, c={"Nergal", 1449, 43.3, 7.7}}, -- Thick Leather Ammo Pouch
-  {q=94304, w=264104, i=10050, n=1, t="E", p="TA", s=205, r=125, c=nil}, -- Mageweave Bag
-  {q=94305, w=264105, i=10023, n=1, t="E", p="TA", s=205, r=125, c=nil}, -- Shadoweave Gloves
+  {q=94304, w=264104, i=10050, n=1, t="E", p="TA", s=205, r=125, c={"Rigglefuzz", 1418, 42.4, 52.9}}, -- Mageweave Bag
+  {q=94305, w=264105, i=10023, n=1, t="E", p="TA", s=205, r=125, c={"Willow", 1443, 62.2, 39.6}}, -- Shadoweave Gloves
   {q=94306, w=264106, i=7063, n=1, t="E", p="TA", s=185, r=125, c={"Tabetha", 1445, 46.1, 57.1}}, -- Crimson Silk Robe
-  {q=94307, w=264107, i=10004, n=1, t="E", p="TA", s=195, r=125, c=nil}, -- Shadoweave Robe
-  {q=94308, w=264108, i=22246, n=1, t="E", p="TA", s=205, r=125, c=nil}, -- Enchanted Mageweave Pouch
-  {q=94309, w=264109, i=4329, n=1, t="E", p="TA", s=185, r=125, c=nil}, -- Star Belt
+  {q=94307, w=264107, i=10004, n=1, t="E", p="TA", s=195, r=125, c={"Eridan Bluewind", 1448, 51.4, 81.5}}, -- Shadoweave Robe
+  {q=94308, w=264108, i=22246, n=1, t="E", p="TA", s=205, r=125, c={"Impsy", 1448, 41.4, 45.0}}, -- Enchanted Mageweave Pouch
+  {q=94309, w=264109, i=4329, n=1, t="E", p="TA", s=185, r=125, c={"Mylentha Riverbend", 1450, 51.8, 32.6}}, -- Star Belt
   {q=94310, w=264110, i=9998, n=1, t="E", p="TA", s=185, r=125, c={"Spek", 2548, 76.9, 54.1}}, -- Black Mageweave Vest
   {q=94311, w=264111, i=10009, n=1, t="E", p="TA", s=195, r=125, c={"Lookout Captain Lolo Longstriker", 1427, 37.7, 26.6}}, -- Red Mageweave Pants
   {q=94312, w=264112, i=10052, n=1, t="E", p="TA", s=190, r=125, c={"Bullets Bigblast", 1435, 70.0, 41.6}}, -- Orange Martial Shirt
   {q=94313, w=264113, i=10008, n=1, t="E", p="TA", s=185, r=125, c={"Vizzklick", 1446, 51.0, 27.4}}, -- White Bandit Mask
-  {q=94314, w=264114, i=10042, n=1, t="E", p="TA", s=205, r=125, c=nil}, -- Cindercloth Robe
+  {q=94314, w=264114, i=10042, n=1, t="E", p="TA", s=205, r=125, c={"Atal'ai Exile", 1425, 33.8, 75.2}}, -- Cindercloth Robe
   {q=94315, w=264115, i=7061, n=1, t="E", p="TA", s=180, r=125, c={"Petra Grossen", 1449, 43.7, 7.2}}, -- Earthen Silk Belt
-  {q=94316, w=264116, i=9224, n=1, t="A", p="AL", s=265, r=200, c=nil, zh=1451}, -- Elixir of Demonslaying
-  {q=94317, w=264117, i=12190, n=1, t="A", p="AL", s=245, r=200, c=nil}, -- Dreamless Sleep Potion
-  {q=94318, w=264118, i=13457, n=1, t="A", p="AL", s=305, r=200, c=nil}, -- Greater Fire Protection Potion
-  {q=94319, w=264119, i=9233, n=1, t="A", p="AL", s=265, r=200, c=nil}, -- Elixir of Detect Demon
-  {q=94320, w=264120, i=9088, n=1, t="A", p="AL", s=255, r=200, c=nil}, -- Gift of Arthas
+  {q=94316, w=264116, i=9224, n=1, t="A", p="AL", s=265, r=200, c={"Archmage Xylem", 1447, 29.2, 40.2}}, -- Elixir of Demonslaying
+  {q=94317, w=264117, i=12190, n=1, t="A", p="AL", s=245, r=200, c={"Kum'isha the Collector", 1419, 52.0, 35.6}}, -- Dreamless Sleep Potion
+  {q=94318, w=264118, i=13457, n=1, t="A", p="AL", s=305, r=200, c={"Gorzeeki Wildeyes", 1428, 12.4, 31.6}}, -- Greater Fire Protection Potion
+  {q=94319, w=264119, i=9233, n=1, t="A", p="AL", s=265, r=200, c={"Hastings", 1430, 47.0, 75.3}}, -- Elixir of Detect Demon
+  {q=94320, w=264120, i=9088, n=1, t="A", p="AL", s=255, r=200, c={"Adon", 1423, 50.9, 11.5}}, -- Gift of Arthas
   {q=94321, w=264121, i=13513, n=1, t="A", p="AL", s=315, r=200, c=nil}, -- Flask of Chromatic Resistance
-  {q=94322, w=264122, i=3387, n=1, t="A", p="AL", s=275, r=200, c=nil}, -- Limited Invulnerability Potion
-  {q=94323, w=264123, i=18253, n=1, t="A", p="AL", s=310, r=200, c=nil}, -- Major Rejuvenation Potion
-  {q=94324, w=264124, i=246948, n=1, t="A", p="AL", s=260, r=200, c=nil}, -- Distilled Firewater
+  {q=94322, w=264122, i=3387, n=1, t="A", p="AL", s=275, r=200, c={"Jarund Stoutstrider", 1451, 82.0, 18.1}}, -- Limited Invulnerability Potion
+  {q=94323, w=264123, i=18253, n=1, t="A", p="AL", s=310, r=200, c={"Kirala Fairgrass", 1422, 59.6, 53.1}}, -- Major Rejuvenation Potion
+  {q=94324, w=264124, i=246948, n=1, t="A", p="AL", s=260, r=200, c={"Bor'dorc", 1452, 64.8, 33.2}}, -- Distilled Firewater
   {q=94325, w=264125, i=12417, n=1, t="A", p="BL", s=290, r=200, c=nil}, -- Radiant Circlet
-  {q=94326, w=264126, i=12416, n=1, t="A", p="BL", s=255, r=200, c=nil}, -- Radiant Belt
-  {q=94327, w=264127, i=7929, n=1, t="A", p="BL", s=225, r=200, c=nil}, -- Orcish War Leggings
-  {q=94328, w=264128, i=7969, n=1, t="A", p="BL", s=230, r=200, c=nil}, -- Mithril Spurs
+  {q=94326, w=264126, i=12416, n=1, t="A", p="BL", s=255, r=200, c={"Kum'isha the Collector", 1419, 52.0, 35.6}}, -- Radiant Belt
+  {q=94327, w=264127, i=7929, n=1, t="A", p="BL", s=225, r=200, c={"Ugkragg", 1428, 38.4, 35.4}}, -- Orcish War Leggings
+  {q=94328, w=264128, i=7969, n=1, t="A", p="BL", s=230, r=200, c={"Calliard", 1430, 48.4, 68.7}}, -- Mithril Spurs
   {q=94329, w=264129, i=12422, n=1, t="A", p="BL", s=295, r=200, c=nil}, -- Imperial Plate Chest
   {q=94330, w=264130, i=20549, n=1, t="A", p="BL", s=320, r=200, c=nil}, -- Darkrune Gauntlets
   {q=94331, w=264131, i=12775, n=1, t="A", p="BL", s=280, r=200, c=nil}, -- Huge Thorium Battleaxe
   {q=94332, w=264132, i=15872, n=1, t="A", p="BL", s=250, r=200, c=nil}, -- Arcanite Skeleton Key
-  {q=94333, w=264133, i=7947, n=1, t="A", p="BL", s=255, r=200, c=nil}, -- Ebon Shiv
-  {q=94334, w=264134, i=16023, n=1, t="A", p="EN", s=295, r=200, c=nil}, -- Masterwork Target Dummy
-  {q=94335, w=264135, i=10504, n=1, t="A", p="EN", s=265, r=200, c=nil}, -- Green Lens
-  {q=94336, w=264136, i=15996, n=1, t="A", p="EN", s=285, r=200, c=nil}, -- Lifelike Mechanical Toad
-  {q=94337, w=264137, i=18645, n=1, t="A", p="EN", s=275, r=200, c=nil}, -- Alarm-O-Bot
+  {q=94333, w=264133, i=7947, n=1, t="A", p="BL", s=255, r=200, c={"Xizzer Fizzbolt", 1452, 60.8, 38.6}}, -- Ebon Shiv
+  {q=94334, w=264134, i=16023, n=1, t="A", p="EN", s=295, r=200, c={"Rayan Dawnrisen", 1447, 30.0, 40.2}}, -- Masterwork Target Dummy
+  {q=94335, w=264135, i=10504, n=1, t="A", p="EN", s=265, r=200, c={"Kum'isha the Collector", 1419, 52.0, 35.6}}, -- Green Lens
+  {q=94336, w=264136, i=15996, n=1, t="A", p="EN", s=285, r=200, c={"Ugkragg", 1428, 38.4, 35.4}}, -- Lifelike Mechanical Toad
+  {q=94337, w=264137, i=18645, n=1, t="A", p="EN", s=275, r=200, c={"Hastings", 1430, 47.0, 75.3}}, -- Alarm-O-Bot
   {q=94338, w=264138, i=18587, n=1, t="A", p="EN", s=285, r=200, c=nil}, -- Goblin Jumper Cables XL
-  {q=94339, w=264139, i=18232, n=1, t="A", p="EN", s=320, r=200, c=nil}, -- Field Repair Bot 74A
-  {q=94340, w=264140, i=18631, n=1, t="A", p="EN", s=270, r=200, c=nil}, -- Truesilver Transformer
-  {q=94341, w=264141, i=10548, n=1, t="A", p="EN", s=260, r=200, c=nil}, -- Sniper Scope
+  {q=94339, w=264139, i=18232, n=1, t="A", p="EN", s=320, r=200, c={"Kaylaena Springwhisper", 2482, 60.1, 61.2}}, -- Field Repair Bot 74A
+  {q=94340, w=264140, i=18631, n=1, t="A", p="EN", s=270, r=200, c={"Khur Hornstriker", 1451, 48.7, 37}}, -- Truesilver Transformer
+  {q=94341, w=264141, i=10548, n=1, t="A", p="EN", s=260, r=200, c={"Suspicious Adventurer", 1422, 65.7, 76.1}}, -- Sniper Scope
   {q=94342, w=264142, i=21277, n=1, t="A", p="EN", s=320, r=200, c=nil}, -- Tranquil Mechanical Yeti
   {q=94343, w=264143, i=15087, n=1, t="A", p="LW", s=285, r=200, c=nil}, -- Wicked Leather Pants
   {q=94344, w=264144, i=18258, n=1, t="A", p="LW", s=285, r=200, c=nil}, -- Gordok Ogre Suit
   {q=94345, w=264145, i=15053, n=1, t="A", p="LW", s=280, r=200, c=nil}, -- Volcanic Breastplate
-  {q=94346, w=264146, i=15094, n=1, t="A", p="LW", s=285, r=200, c=nil}, -- Runic Leather Headband
-  {q=94347, w=264147, i=15084, n=1, t="A", p="LW", s=260, r=200, c=nil}, -- Wicked Leather Bracers
-  {q=94348, w=264148, i=15075, n=1, t="A", p="LW", s=285, r=200, c=nil}, -- Chimeric Vest
+  {q=94346, w=264146, i=15094, n=1, t="A", p="LW", s=285, r=200, c={"Hastings", 1430, 47.0, 75.3}}, -- Runic Leather Headband
+  {q=94347, w=264147, i=15084, n=1, t="A", p="LW", s=260, r=200, c={"Quartermaster Miranda Breechlock", 1423, 71.8, 50.2}}, -- Wicked Leather Bracers
+  {q=94348, w=264148, i=15075, n=1, t="A", p="LW", s=285, r=200, c={"Earthcaller Franzahl", 1452, 54.0, 90.4}}, -- Chimeric Vest
   {q=94349, w=264149, i=15080, n=1, t="A", p="LW", s=290, r=200, c=nil}, -- Heavy Scorpid Helm
-  {q=94350, w=264150, i=15092, n=1, t="A", p="LW", s=270, r=200, c=nil}, -- Runic Leather Bracers
-  {q=94351, w=264151, i=15071, n=1, t="A", p="LW", s=270, r=200, c=nil}, -- Frostsaber Boots
-  {q=94352, w=264152, i=14130, n=1, t="A", p="TA", s=275, r=200, c=nil}, -- Wizardweave Turban
-  {q=94353, w=264153, i=14046, n=1, t="A", p="TA", s=230, r=200, c=nil}, -- Runecloth Bag
-  {q=94354, w=264154, i=13864, n=1, t="A", p="TA", s=250, r=200, c=nil}, -- Runecloth Boots
-  {q=94355, w=264155, i=10036, n=1, t="A", p="TA", s=155, r=200, c=nil}, -- Tuxedo Jacket
-  {q=94356, w=264156, i=14108, n=1, t="A", p="TA", s=255, r=200, c=nil}, -- Felcloth Boots
+  {q=94350, w=264150, i=15092, n=1, t="A", p="LW", s=270, r=200, c={"Fallen Adventurer", 1422, 38.2, 72.4}}, -- Runic Leather Bracers
+  {q=94351, w=264151, i=15071, n=1, t="A", p="LW", s=270, r=200, c={"Blixxrak", 1452, 61.7, 37.8}}, -- Frostsaber Boots
+  {q=94352, w=264152, i=14130, n=1, t="A", p="TA", s=275, r=200, c={"Joy Ar'nareth", 1447, 30.0, 40.1}}, -- Wizardweave Turban
+  {q=94353, w=264153, i=14046, n=1, t="A", p="TA", s=230, r=200, c={"Kum'isha the Collector", 1419, 52.0, 35.6}}, -- Runecloth Bag
+  {q=94354, w=264154, i=13864, n=1, t="A", p="TA", s=250, r=200, c={"Gorzeeki Wildeyes", 1428, 12.4, 31.6}}, -- Runecloth Boots
+  {q=94355, w=264155, i=10036, n=1, t="A", p="TA", s=155, r=200, c={"Hastings", 1430, 47.0, 75.3}}, -- Tuxedo Jacket
+  {q=94356, w=264156, i=14108, n=1, t="A", p="TA", s=255, r=200, c={"Egan", 1423, 11.4, 26.6}}, -- Felcloth Boots
   {q=94357, w=264157, i=22251, n=1, t="A", p="TA", s=245, r=200, c=nil}, -- Cenarion Herb Bag
-  {q=94358, w=264158, i=10025, n=1, t="A", p="TA", s=215, r=200, c=nil}, -- Shadoweave Mask
-  {q=94359, w=264159, i=14141, n=1, t="A", p="TA", s=240, r=200, c=nil}, -- Ghostweave Vest
-  {q=94360, w=264160, i=21340, n=1, t="A", p="TA", s=230, r=200, c=nil}, -- Soul Pouch
+  {q=94358, w=264158, i=10025, n=1, t="A", p="TA", s=215, r=200, c={"Hermit Ortell", 1451, 67.2, 69.8}}, -- Shadoweave Mask
+  {q=94359, w=264159, i=14141, n=1, t="A", p="TA", s=240, r=200, c={"An Old Tombstone", 1422, 49.9, 77.5}}, -- Ghostweave Vest
+  {q=94360, w=264160, i=21340, n=1, t="A", p="TA", s=230, r=200, c={"Zelizax", 1452, 57.6, 88.1}}, -- Soul Pouch
 }
 
 -- Waylaid crates. favor = Merchant's Favor for a plain (white) crate; Artisan values unconfirmed.
