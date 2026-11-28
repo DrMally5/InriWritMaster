@@ -9,6 +9,9 @@ local CALLER = "InriWritMaster"         -- Auctionator caller id
 local GOLD = 10000
 local floor, max, min, huge = math.floor, math.max, math.min, math.huge
 local fmt = string.format
+-- Separator dot. The default Cyrillic font has no U+00B7 (it shows as a square), so ruRU uses U+2219.
+local SEP = (GetLocale and GetLocale() == "ruRU") and "\226\136\153" or "\194\183"
+WM.SEP = SEP
 
 ---------------------------------------------------------------------------
 -- Colours / theme
@@ -1208,7 +1211,7 @@ local function WritCells(e)
   local nameCol = e.owned and "green" or "white"
   local zone
   local cname, map = Customer(w)
-  zone = map and (ZoneName(map) .. col("grey", " · " .. cname)) or (w.zh and (ZoneName(w.zh) .. col("grey", " · see marker")))
+  zone = map and (ZoneName(map) .. col("grey", " " .. SEP .. " " .. cname)) or (w.zh and (ZoneName(w.zh) .. col("grey", " " .. SEP .. " see marker")))
     or col("grey", e.owned and "learned on turn-in" or "unknown")
   local eff
   if e.eff == huge then eff = col("green", "free")
@@ -1244,7 +1247,7 @@ local function WritTooltip(row, e)
   local w = e.w
   RowTipOwner(row)
   GameTooltip:SetText(ItemName(w.i) or ("item " .. w.i), 1, 1, 1)
-  GameTooltip:AddDoubleLine(col("gold", "Craftsman's Writ"), fmt("%s · %s · %d rep", WM.PROF_NAME[w.p] or w.p, WM.TIER_NAME[w.t], w.r))
+  GameTooltip:AddDoubleLine(col("gold", "Craftsman's Writ"), fmt("%s " .. SEP .. " %s " .. SEP .. " %d rep", WM.PROF_NAME[w.p] or w.p, WM.TIER_NAME[w.t], w.r))
   if w.s then GameTooltip:AddDoubleLine("Skill to craft", tostring(w.s), 0.8, 0.8, 0.8, 1, 1, 1) end
   GameTooltip:AddDoubleLine("Writ cost", Money(e.writCost) .. " " .. col("grey", e.writSrc or "no AH data"))
   local named, sealed = AHPrice(w.w), AHPrice(WM.SEALED[w.t])
@@ -1270,7 +1273,7 @@ local function WritTooltip(row, e)
   end
   if e.done then GameTooltip:AddLine(col("grey", "Already turned in today.")) end
   if WM.Plan()[w.q] then GameTooltip:AddLine(col("gold", "On today's list")) end
-  GameTooltip:AddLine(col("grey", "Click: select · Ctrl-click: select several · Shift-click: add/remove from today · Right-click: waypoint"))
+  GameTooltip:AddLine(col("grey", "Click: select " .. SEP .. " Ctrl-click: select several " .. SEP .. " Shift-click: add/remove from today " .. SEP .. " Right-click: waypoint"))
   GameTooltip:Show()
 end
 
@@ -1550,7 +1553,7 @@ function ShowCrates()
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine(col("grey", "Turn in to " .. WM.CAMP[PlayerFaction()].intake .. " at " .. WM.CAMP[PlayerFaction()].where), 1, 1, 1, true)
     if WM.CratePlan()[c.id] then GameTooltip:AddLine(col("gold", "On today's list")) end
-    GameTooltip:AddLine(col("grey", "Click: select · Ctrl-click: select several · Shift-click: add/remove from today"))
+    GameTooltip:AddLine(col("grey", "Click: select " .. SEP .. " Ctrl-click: select several " .. SEP .. " Shift-click: add/remove from today"))
     GameTooltip:Show()
   end
   UI.clickFn = function(e, btn)
@@ -1786,9 +1789,9 @@ local function ShowInfo()
   add(" ")
   local ver = (C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata or function() end)(ADDON, "Version")
   if not ver or ver:find("@") then ver = "dev" end
-  add(col("gold", "About") .. col("grey", "   Inri's WritMaster " .. ver .. "  ·  Author: Inri"))
+  add(col("gold", "About") .. col("grey", "   Inri's WritMaster " .. ver .. "  " .. SEP .. "  Author: Inri"))
   add("  |cff04cca4Development is done by a hardworking AI (& 1 lazy human)|r")
-  add("  " .. col("white", "Ideas, bugs or a missing customer?") .. col("grey", "  github.com/DrMally5/InriWritMaster/issues  ·  requests get built"))
+  add("  " .. col("white", "Ideas, bugs or a missing customer?") .. col("grey", "  github.com/DrMally5/InriWritMaster/issues  " .. SEP .. "  requests get built"))
   UI.list:SetData(lines)
   UI.detail1:SetText(fmt("Camp: %s", col("white", camp.where)))
   UI.detail2:SetText("Data decoded from your Questie database and Forever guides. Unconfirmed values are marked and learned in game.")

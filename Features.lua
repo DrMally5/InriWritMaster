@@ -2,6 +2,7 @@
 local ADDON, WM = ...
 local H = WM.H
 local fmt, floor, huge, max = string.format, math.floor, math.huge, math.max
+local SEP = WM.SEP or "-"
 local GOLD = 10000
 local col, Money, ItemName = H.col, H.Money, H.ItemName
 
@@ -85,7 +86,7 @@ local function AddWritLines(tt, id)
   tt:AddLine(" ")
   if w then
     local e = H.EvalWrit(w)
-    tt:AddDoubleLine(col("gold", "WritMaster"), fmt("%s · %d rep", WM.TIER_NAME[w.t], w.r))
+    tt:AddDoubleLine(col("gold", "WritMaster"), fmt("%s " .. SEP .. " %d rep", WM.TIER_NAME[w.t], w.r))
     tt:AddDoubleLine("Requested item", fmt("%s x%d", ItemName(w.i) or w.i, w.n or 1), 1, 1, 1, 1, 1, 1)
     tt:AddDoubleLine("Total cost", Money(e.total) .. (e.complete and "" or col("grey", " (partial)")))
     if e.eff then tt:AddDoubleLine("Rep per gold", e.eff == huge and col("green", "free") or col("white", fmt("%.1f", e.eff))) end
@@ -104,7 +105,7 @@ local function AddWritLines(tt, id)
     local sealed = WM.AHPrice(id)
     local avgItem = b.avgItem[sealedTier]
     local rep = WM.TIER_REP[sealedTier]
-    tt:AddDoubleLine(col("gold", "WritMaster"), fmt("random %s order · %d rep", WM.TIER_NAME[sealedTier], rep))
+    tt:AddDoubleLine(col("gold", "WritMaster"), fmt("random %s order " .. SEP .. " %d rep", WM.TIER_NAME[sealedTier], rep))
     tt:AddDoubleLine("Avg item cost for this tier", Money(avgItem))
     if sealed and avgItem then
       local eff = rep / ((sealed + avgItem) / GOLD)

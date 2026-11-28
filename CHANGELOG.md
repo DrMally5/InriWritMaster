@@ -1,5 +1,9 @@
 # Inri's WritMaster
 
+## v1.0.12 (2026-11-28)
+
+- Russian clients: the dot separator in tooltips and labels no longer shows as a square. The default Cyrillic font doesn't have it, so ruRU now uses a dot the font supports. Thanks to refaim for the report.
+
 ## v1.0.11 (2026-11-25)
 
 - 47 more writ customers built in, from Questie's latest database: every Expert writ now has its customer, and 32 of 45 Artisan writs do (up from none). New zones include Azshara, Blasted Lands, Burning Steppes, Deadwind Pass, the Plaguelands, Winterspring and Mount Hyjal.
